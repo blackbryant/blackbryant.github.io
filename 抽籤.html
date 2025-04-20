@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>彈跳球抽籤機</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f9f9f9;
+    }
+
+    textarea {
+      width: 300px;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+
+    input[type="file"] {
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    #winner {
+      font-size: 24px;
+      font-weight: bold;
+      color: green;
+      margin-bottom: 20px;
+    }
+
+    #box {
+      margin: 0 auto;
+      width: 500px;
+      height: 300px;
+      border: 3px solid #ccc;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ball {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #ffcc00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎱 抽籤彈珠機 🎱</h1>
+
+  <p>請輸入名單（用逗號分隔）</p>
+  <textarea id="nameInput" placeholder="例如：小明,小美,阿忠,佩佩"></textarea><br>
+
+  <p>或選擇 CSV 檔匯入：</p>
+  <input type="file" id="csvInput" accept=".csv" onchange="handleCSV(event)"><br>
+
+  <button onclick="startDraw()">開始抽籤！</button>
+
+  <div id="winner"></div>
+  <div id="box"></div>
+
+  <script>
+    let balls = [];
+    let animationId;
+    let box;
+    let velocities = [];
+
+    function handleCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const names = lines.map(line => line.split(',')[0].trim()).filter(Boolean);
+        document.getElementById("nameInput").value = names.join(',');
+      };
+      reader.readAsText(file);
+    }
+
+    function createBouncingBalls(names) {
+      box = document.getElementById("box");
+      box.innerHTML = '';
+      balls = [];
+      velocities = [];
+
+      names.forEach((name, i) => {
+        const ball = document.createElement("div");
+        ball.className = "ball";
+        ball.textContent = name;
+
+        const x = Math.random() * (box.clientWidth - 60);
+        const y = Math.random() * (box.clientHeight - 60);
+        ball.style.left = `${x}px`;
+        ball.style.top = `${y}px`;
+
+        box.appendChild(ball);
+        balls.push(ball);
+
+        velocities.push({
+          dx: (Math.random() * 4 + 2) * (Math.random() < 0.5 ? -1 : 1),
+          dy: (Math.random() * 4 + 2) * (Math.random() < 0.5 ? -1 : 1)
+        });
+      });
+    }
+
+    function moveBalls() {
+      balls.forEach((ball, i) => {
+        let x = parseFloat(ball.style.left);
+        let y = parseFloat(ball.style.top);
+        let dx = velocities[i].dx;
+        let dy = velocities[i].dy;
+
+        x += dx;
+        y += dy;
+
+        if (x <= 0 || x >= box.clientWidth - 60) velocities[i].dx *= -1;
+        if (y <= 0 || y >= box.clientHeight - 60) velocities[i].dy *= -1;
+
+        ball.style.left = `${x}px`;
+        ball.style.top = `${y}px`;
+      });
+
+      animationId = requestAnimationFrame(moveBalls);
+    }
+
+    function startDraw() {
+      const input = document.getElementById("nameInput").value.trim();
+      const winnerDisplay = document.getElementById("winner");
+      winnerDisplay.textContent = '';
+
+      if (!input) {
+        alert("請輸入名單！");
+        return;
+      }
+
+      const names = input.split(',').map(n => n.trim()).filter(Boolean);
+      if (names.length < 2) {
+        alert("至少需要兩位參與者！");
+        return;
+      }
+
+      createBouncingBalls(names);
+      cancelAnimationFrame(animationId);
+      moveBalls();
+
+      // 停下並選出中獎者
+      setTimeout(() => {
+        cancelAnimationFrame(animationId);
+        const winnerIndex = Math.floor(Math.random() * balls.length);
+        const winnerBall = balls[winnerIndex];
+
+        winnerBall.style.backgroundColor = 'limegreen';
+        winnerBall.style.color = '#fff';
+        winnerBall.style.border = '3px solid #333';
+
+        document.getElementById("winner").textContent = `🎉 得獎者是：${winnerBall.textContent} 🎉`;
+      }, 4000); // 4 秒後停下
+    }
+  </script>
+</body>
+</html>
