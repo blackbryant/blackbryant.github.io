@@ -1,22 +1,230 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>JS Bin</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebMyWidgets</title>
+
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 2rem;
+      border-radius: 8px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .search-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .search-container input {
+      padding: 10px;
+      width: 300px;
+      font-size: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .search-container button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .search-container button:hover {
+      background-color: #45a049;
+    }
+
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+
+    .link-item {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px;
+      text-align: left;
+      border-radius: 8px;
+      transition: transform 0.3s;
+      display: flex;
+      align-items: center;
+    }
+
+    .link-item:hover {
+      transform: scale(1.03);
+    }
+
+    .link-item a {
+      text-decoration: none;
+      color: #333;
+      font-size: 1.2rem;
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .link-icon {
+      font-size: 1.4rem;
+      color: #4CAF50;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+
+    .pagination button:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-<div id="bgImg">
-  <div id="myText">
-    <h1>I am Jia-Chi</h1>
-    <h2>My skill : C/C++, Arduino, Web</h2>
-    <a href="https://output.jsbin.com/cuqex" target="_blank">
-    <button id="myBtn">
-      See my projects
-    </button>
-    </a>
+
+  <header>
+    WebMyWidgets - 工具大集合
+  </header>
+
+  <div class="container">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="搜尋連結..." />
+      <button onclick="searchLinks()">搜尋</button>
+    </div>
+
+    <div id="linkList" class="link-list">
+      <!-- 動態生成連結 -->
+    </div>
+
+    <div class="pagination">
+      <button id="prevBtn" onclick="changePage(-1)">上一頁</button>
+      <button id="nextBtn" onclick="changePage(1)">下一頁</button>
+    </div>
   </div>
-  
-</div>
+
+  <footer>
+    &copy; 2025 WebMyWidgets. All rights reserved.
+  </footer>
+
+  <script>
+    const allLinks = [
+      { text: "抽籤小程式", url: "https://example.com/lottogame", icon: "bi-dice-5" },
+      { text: "教學範例 1", url: "https://example.com/tutorial1", icon: "bi-journal-code" },
+      { text: "教學範例 2", url: "https://example.com/tutorial2", icon: "bi-journal-code" },
+      { text: "工具集合", url: "https://example.com/tools", icon: "bi-tools" },
+      { text: "部落格", url: "https://example.com/blog", icon: "bi-chat-dots" },
+      { text: "API 範例", url: "https://example.com/api", icon: "bi-braces" },
+      { text: "設計工具", url: "https://example.com/design-tools", icon: "bi-brush" },
+      { text: "開發工具", url: "https://example.com/dev-tools", icon: "bi-code-slash" },
+      { text: "測試工具", url: "https://example.com/test-tools", icon: "bi-bug" },
+      { text: "資料分析", url: "https://example.com/data-analysis", icon: "bi-bar-chart" },
+      { text: "學習資源", url: "https://example.com/learning-resources", icon: "bi-book" },
+      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square" }
+    ];
+
+    const itemsPerPage = 5;
+    let currentPage = 1;
+
+    function displayLinks(links) {
+      const linkListDiv = document.getElementById('linkList');
+      linkListDiv.innerHTML = '';
+
+      links.forEach(link => {
+        const linkDiv = document.createElement('div');
+        linkDiv.className = 'link-item';
+        linkDiv.innerHTML = `
+          <i class="link-icon bi ${link.icon}"></i>
+          <a href="${link.url}" target="_blank">${link.text}</a>
+        `;
+        linkListDiv.appendChild(linkDiv);
+      });
+    }
+
+    function getPageLinks(page) {
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      return allLinks.slice(startIndex, endIndex);
+    }
+
+    function searchLinks() {
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const filteredLinks = allLinks.filter(link =>
+        link.text.toLowerCase().includes(searchQuery)
+      );
+      displayLinks(filteredLinks.slice(0, itemsPerPage));
+      currentPage = 1;
+      updatePagination(filteredLinks.length);
+    }
+
+    function updatePagination(filteredLinksCount) {
+      const totalPages = Math.ceil(filteredLinksCount / itemsPerPage);
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+    }
+
+    function changePage(direction) {
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const filteredLinks = allLinks.filter(link =>
+        link.text.toLowerCase().includes(searchQuery)
+      );
+
+      const totalPages = Math.ceil(filteredLinks.length / itemsPerPage);
+      currentPage += direction;
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const pageLinks = filteredLinks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+      displayLinks(pageLinks);
+      updatePagination(filteredLinks.length);
+    }
+
+    window.onload = function () {
+      displayLinks(getPageLinks(currentPage));
+      updatePagination(allLinks.length);
+    };
+  </script>
+
 </body>
 </html>
