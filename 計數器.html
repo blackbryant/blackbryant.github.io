@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>按鈕計數器</title>
+  <script>
+    const colors = [
+      "bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500",
+      "bg-purple-500", "bg-pink-500", "bg-indigo-500", "bg-teal-500", "bg-orange-500"
+    ];
+
+    function getWidthClass(count) {
+      if (count === 1) return 'w-full';
+      if (count === 2) return 'w-1/2';
+      if (count === 3) return 'w-1/3';
+      if (count === 4) return 'w-1/2';
+      if (count === 5 || count === 6) return 'w-1/3';
+      if (count === 7 || count === 8 || count === 9) return 'w-1/4';
+      return 'w-1/3';
+    }
+
+    function generateButtons() {
+      const container = document.getElementById("buttonContainer");
+      const count = parseInt(document.getElementById("selectCount").value, 10);
+      container.innerHTML = "";
+
+      if (!count || count < 1) return;
+
+      const widthClass = getWidthClass(count);
+
+      for (let i = 0; i < count; i++) {
+        const btn = document.createElement("button");
+        btn.className = `text-white py-10 m-2 rounded-2xl text-2xl font-bold shadow-lg transition-transform duration-200 hover:scale-105 ${widthClass} ${colors[i % colors.length]}`;
+        btn.textContent = "0";
+        btn.onclick = () => {
+          btn.textContent = parseInt(btn.textContent, 10) + 1;
+        };
+        container.appendChild(btn);
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+    <label for="selectCount" class="block mb-4 text-xl font-semibold text-gray-700">選擇按鈕數量：</label>
+    <select id="selectCount" onchange="generateButtons()" class="w-full p-3 border border-gray-300 rounded mb-6 text-lg">
+      <option value="">請選擇</option>
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+      <option>8</option>
+      <option>9</option>
+    </select>
+    <div id="buttonContainer" class="flex flex-wrap justify-center gap-4"></div>
+  </div>
+</body>
+</html>
