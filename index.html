@@ -1,230 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WebMyWidgets</title>
-
-  <!-- Bootstrap Icons CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
-
-    header {
-      text-align: center;
-      padding: 20px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 2rem;
-      border-radius: 8px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .search-container {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .search-container input {
-      padding: 10px;
-      width: 300px;
-      font-size: 1rem;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      margin-right: 10px;
-    }
-
-    .search-container button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .search-container button:hover {
-      background-color: #45a049;
-    }
-
-    .link-list {
-      display: flex;
-      flex-direction: column;
-      margin-top: 20px;
-    }
-
-    .link-item {
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin: 10px;
-      text-align: left;
-      border-radius: 8px;
-      transition: transform 0.3s;
-      display: flex;
-      align-items: center;
-    }
-
-    .link-item:hover {
-      transform: scale(1.03);
-    }
-
-    .link-item a {
-      text-decoration: none;
-      color: #333;
-      font-size: 1.2rem;
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .link-icon {
-      font-size: 1.4rem;
-      color: #4CAF50;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .pagination button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      cursor: pointer;
-      margin: 0 5px;
-    }
-
-    .pagination button:hover {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: #888;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>音訊錄製與轉換工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.0/lame.min.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@latest/dist/ffmpeg.min.js"></script>
 </head>
-<body>
+<body class="bg-gray-100 p-6 min-h-screen flex flex-col items-center justify-start gap-6">
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl">
+    <h1 class="text-2xl font-bold mb-4">🎙️ 錄音工具（MP3 / WebM）</h1>
 
-  <header>
-    WebMyWidgets - 工具大集合
-  </header>
-
-  <div class="container">
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="搜尋連結..." />
-      <button onclick="searchLinks()">搜尋</button>
+    <div class="mb-4 flex flex-col gap-2">
+      <label class="text-gray-700 font-medium">錄音格式：</label>
+      <select id="formatSelect" class="border rounded px-3 py-2">
+        <option value="mp3">MP3</option>
+        <option value="webm">WebM</option>
+      </select>
     </div>
 
-    <div id="linkList" class="link-list">
-      <!-- 動態生成連結 -->
+    <div class="flex justify-center gap-4 mb-6">
+      <button id="startBtn" class="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 disabled:bg-blue-300 transition">錄音</button>
+      <button id="stopBtn" class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 disabled:bg-red-300 transition" disabled>停止</button>
     </div>
 
-    <div class="pagination">
-      <button id="prevBtn" onclick="changePage(-1)">上一頁</button>
-      <button id="nextBtn" onclick="changePage(1)">下一頁</button>
-    </div>
+    <div id="recordingsList" class="space-y-4 text-left"></div>
   </div>
 
-  <footer>
-    &copy; 2025 WebMyWidgets. All rights reserved.
-  </footer>
+  <!-- WebM轉MP3 -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl mt-4">
+    <h2 class="text-xl font-bold mb-2">🔁 上傳 WebM 轉 MP3</h2>
+    <input type="file" id="uploadInput" accept=".webm" class="mb-4 block">
+    <button id="convertBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-green-300" disabled>轉換為 MP3</button>
+    <div id="conversionResult" class="mt-4"></div>
+  </div>
 
   <script>
-    const allLinks = [
-      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5" },
-      { text: "計數器", url: "計數器.html", icon: "bi-journal-code" },
-      { text: "錄音(測試中)", url: "錄音.html", icon: "bi-journal-code" },
-      { text: "工具集合", url: "https://example.com/tools", icon: "bi-tools" },
-      { text: "部落格", url: "https://example.com/blog", icon: "bi-chat-dots" },
-      { text: "API 範例", url: "https://example.com/api", icon: "bi-braces" },
-      { text: "設計工具", url: "https://example.com/design-tools", icon: "bi-brush" },
-      { text: "開發工具", url: "https://example.com/dev-tools", icon: "bi-code-slash" },
-      { text: "測試工具", url: "https://example.com/test-tools", icon: "bi-bug" },
-      { text: "資料分析", url: "https://example.com/data-analysis", icon: "bi-bar-chart" },
-      { text: "學習資源", url: "https://example.com/learning-resources", icon: "bi-book" },
-      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square" }
-    ];
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const formatSelect = document.getElementById('formatSelect');
+    const recordingsList = document.getElementById('recordingsList');
 
-    const itemsPerPage = 5;
-    let currentPage = 1;
+    let recorder, stream;
+    let audioContext, scriptProcessor, leftChannel = [], recordingLength = 0, sampleRate;
 
-    function displayLinks(links) {
-      const linkListDiv = document.getElementById('linkList');
-      linkListDiv.innerHTML = '';
+    const getTimestamp = () => new Date().toISOString().replace(/[:T]/g, '_').slice(0, 19);
 
-      links.forEach(link => {
-        const linkDiv = document.createElement('div');
-        linkDiv.className = 'link-item';
-        linkDiv.innerHTML = `
-          <i class="link-icon bi ${link.icon}"></i>
-          <a href="${link.url}" target="_blank">${link.text}</a>
-        `;
-        linkListDiv.appendChild(linkDiv);
-      });
+    // 錄音按下
+    startBtn.onclick = async () => {
+      const format = formatSelect.value;
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (format === 'webm') {
+        // WebM 錄音
+        recorder = new MediaRecorder(stream);
+        const chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          showRecording(blob, 'webm');
+        };
+        recorder.start();
+      } else {
+        // MP3 錄音
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        sampleRate = audioContext.sampleRate;
+        const source = audioContext.createMediaStreamSource(stream);
+        scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        leftChannel = [];
+        recordingLength = 0;
+        scriptProcessor.onaudioprocess = e => {
+          const samples = e.inputBuffer.getChannelData(0);
+          leftChannel.push(new Float32Array(samples));
+          recordingLength += samples.length;
+        };
+        source.connect(scriptProcessor);
+        scriptProcessor.connect(audioContext.destination);
+      }
+
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    // 停止錄音
+    stopBtn.onclick = () => {
+      const format = formatSelect.value;
+      if (format === 'webm') {
+        recorder.stop();
+        stream.getTracks().forEach(t => t.stop());
+      } else {
+        scriptProcessor.disconnect();
+        audioContext.close();
+        stream.getTracks().forEach(t => t.stop());
+
+        const buffer = mergeBuffers(leftChannel, recordingLength);
+        const blob = encodeMP3(buffer);
+        showRecording(blob, 'mp3');
+      }
+
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
+
+    function showRecording(blob, format) {
+      const url = URL.createObjectURL(blob);
+      const filename = `${getTimestamp()}.${format}`;
+      const container = document.createElement('div');
+      container.className = 'bg-gray-50 p-4 rounded-xl shadow flex flex-col gap-2';
+      container.innerHTML = `
+        <div class="font-medium text-gray-700">📁 ${filename}</div>
+        <audio controls src="${url}" class="w-full"></audio>
+        <a class="text-blue-600 underline text-sm" download="${filename}" href="${url}">⬇️ 下載</a>
+      `;
+      recordingsList.prepend(container);
     }
 
-    function getPageLinks(page) {
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      return allLinks.slice(startIndex, endIndex);
+    function mergeBuffers(channelBuffer, recordingLength) {
+      const result = new Float32Array(recordingLength);
+      let offset = 0;
+      for (const chunk of channelBuffer) {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      }
+      return result;
     }
 
-    function searchLinks() {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
-        link.text.toLowerCase().includes(searchQuery)
-      );
-      displayLinks(filteredLinks.slice(0, itemsPerPage));
-      currentPage = 1;
-      updatePagination(filteredLinks.length);
+    function encodeMP3(samples) {
+      const mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
+      const sampleBlockSize = 1152;
+      const int16Samples = floatTo16BitPCM(samples);
+      const mp3Data = [];
+
+      for (let i = 0; i < int16Samples.length; i += sampleBlockSize) {
+        const chunk = int16Samples.subarray(i, i + sampleBlockSize);
+        const mp3buf = mp3Encoder.encodeBuffer(chunk);
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      }
+      const final = mp3Encoder.flush();
+      if (final.length > 0) mp3Data.push(final);
+
+      return new Blob(mp3Data, { type: 'audio/mp3' });
     }
 
-    function updatePagination(filteredLinksCount) {
-      const totalPages = Math.ceil(filteredLinksCount / itemsPerPage);
-      document.getElementById('prevBtn').disabled = currentPage === 1;
-      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+    function floatTo16BitPCM(input) {
+      const output = new Int16Array(input.length);
+      for (let i = 0; i < input.length; i++) {
+        const s = Math.max(-1, Math.min(1, input[i]));
+        output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      return output;
     }
 
-    function changePage(direction) {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
-        link.text.toLowerCase().includes(searchQuery)
-      );
+    // WebM轉MP3
+    const uploadInput = document.getElementById('uploadInput');
+    const convertBtn = document.getElementById('convertBtn');
+    const conversionResult = document.getElementById('conversionResult');
 
-      const totalPages = Math.ceil(filteredLinks.length / itemsPerPage);
-      currentPage += direction;
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPages) currentPage = totalPages;
+    uploadInput.onchange = () => {
+      convertBtn.disabled = !uploadInput.files.length;
+    };
 
-      const pageLinks = filteredLinks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-      displayLinks(pageLinks);
-      updatePagination(filteredLinks.length);
-    }
-
-    window.onload = function () {
-      displayLinks(getPageLinks(currentPage));
-      updatePagination(allLinks.length);
+    convertBtn.onclick = async () => {
+      const file = uploadInput.files[0];
+      const { createFFmpeg, fetchFile } = window.FFmpeg;
+      const FFmpeg = await loadFFmpeg();
+      const ffmpegInstance = FFmpeg.createFFmpeg({ log: true });
+      await ffmpegInstance.load();
+      ffmpegInstance.FS('writeFile', 'input.webm', await fetchFile(file));
+      await ffmpegInstance.run('-i', 'input.webm', 'output.mp3');
+      const data = ffmpegInstance.FS('readFile', 'output.mp3');
+      const mp3Blob = new Blob([data.buffer], { type: 'audio/mp3' });
+      const url = URL.createObjectURL(mp3Blob);
+      const filename = `${getTimestamp()}_converted.mp3`;
+      conversionResult.innerHTML = `
+        <p class="text-sm text-gray-600 mb-2">✅ 轉換成功：${filename}</p>
+        <audio controls src="${url}" class="w-full mb-2"></audio>
+        <a href="${url}" download="${filename}" class="text-blue-600 underline text-sm">⬇️ 下載 MP3</a>
+      `;
     };
   </script>
-
 </body>
 </html>
