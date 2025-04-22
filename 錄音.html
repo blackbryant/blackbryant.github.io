@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>錄音功能</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6">
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center">
+    <h1 class="text-2xl font-bold mb-4">🎙️ 錄音工具</h1>
+
+    <div class="flex justify-center gap-4 mb-6">
+      <button id="startBtn" class="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 disabled:bg-blue-300 transition">
+        錄音
+      </button>
+      <button id="stopBtn" class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 disabled:bg-red-300 transition" disabled>
+        停止
+      </button>
+    </div>
+
+    <div id="recordingsList" class="space-y-4 text-left"></div>
+  </div>
+
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const recordingsList = document.getElementById('recordingsList');
+
+    function getCurrentTimestamp() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd} ${hh}_${min}_${ss}`;
+    }
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+          const timestamp = getCurrentTimestamp();
+          const filename = `${timestamp}.webm`;
+
+          const container = document.createElement('div');
+          container.className = 'bg-gray-50 p-4 rounded-xl shadow flex flex-col gap-2';
+
+          const title = document.createElement('div');
+          title.textContent = `📁 錄音檔案：${filename}`;
+          title.className = 'font-medium text-gray-700';
+
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = url;
+          audio.className = 'w-full';
+
+          const download = document.createElement('a');
+          download.href = url;
+          download.download = filename;
+          download.textContent = '⬇️ 下載錄音';
+          download.className = 'text-blue-600 underline text-sm';
+
+          container.appendChild(title);
+          container.appendChild(audio);
+          container.appendChild(download);
+          recordingsList.prepend(container); // 最新的放最上面
+        };
+
+        mediaRecorder.start();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+      } catch (err) {
+        alert('無法存取麥克風：' + err.message);
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>
