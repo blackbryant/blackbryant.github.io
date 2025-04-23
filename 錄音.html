@@ -36,23 +36,70 @@
   </div>
 
   <script>
-    const allLinks = [
-      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5" },
-      { text: "計數器", url: "計數器.html", icon: "bi-journal-code" },
-      { text: "錄音(測試)", url: "錄音.html", icon: "bi-journal-code" },
-      { text: "工具集合", url: "https://example.com/tools", icon: "bi-tools" },
-      { text: "部落格", url: "https://example.com/blog", icon: "bi-chat-dots" },
-      { text: "API 範例", url: "https://example.com/api", icon: "bi-braces" },
-      { text: "設計工具", url: "https://example.com/design-tools", icon: "bi-brush" },
-      { text: "開發工具", url: "https://example.com/dev-tools", icon: "bi-code-slash" },
-      { text: "測試工具", url: "https://example.com/test-tools", icon: "bi-bug" },
-      { text: "資料分析", url: "https://example.com/data-analysis", icon: "bi-bar-chart" },
-      { text: "學習資源", url: "https://example.com/learning-resources", icon: "bi-book" },
-      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square" }
-    ];
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const formatSelect = document.getElementById('formatSelect');
+    const recordingsList = document.getElementById('recordingsList');
 
-    const itemsPerPage = 5;
-    let currentPage = 1;
+    let recorder, stream;
+    let audioContext, scriptProcessor, leftChannel = [], recordingLength = 0, sampleRate;
+
+    const getTimestamp = () => new Date().toISOString().replace(/[:T]/g, '_').slice(0, 19);
+
+    // 錄音按下
+    startBtn.onclick = async () => {
+      const format = formatSelect.value;
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (format === 'webm') {
+        // WebM 錄音
+        recorder = new MediaRecorder(stream);
+        const chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          showRecording(blob, 'webm');
+        };
+        recorder.start();
+      } else {
+        // MP3 錄音
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        sampleRate = audioContext.sampleRate;
+        const source = audioContext.createMediaStreamSource(stream);
+        scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        leftChannel = [];
+        recordingLength = 0;
+        scriptProcessor.onaudioprocess = e => {
+          const samples = e.inputBuffer.getChannelData(0);
+          leftChannel.push(new Float32Array(samples));
+          recordingLength += samples.length;
+        };
+        source.connect(scriptProcessor);
+        scriptProcessor.connect(audioContext.destination);
+      }
+
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    // 停止錄音
+    stopBtn.onclick = () => {
+      const format = formatSelect.value;
+      if (format === 'webm') {
+        recorder.stop();
+        stream.getTracks().forEach(t => t.stop());
+      } else {
+        scriptProcessor.disconnect();
+        audioContext.close();
+        stream.getTracks().forEach(t => t.stop());
+
+        const buffer = mergeBuffers(leftChannel, recordingLength);
+        const blob = encodeMP3(buffer);
+        showRecording(blob, 'mp3');
+      }
+
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
 
     function showRecording(blob, format) {
       const url = URL.createObjectURL(blob);
