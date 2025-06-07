@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>動詞三態測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-10 rounded shadow-md w-full max-w-lg">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-8">動詞三態測驗</h1>
+        <div class="mb-6">
+            <a target="_blank" class="text-blue-900"  href="https://bdjh.kl.edu.tw/news/file/2769/%E5%9C%8B%E4%B8%AD%E8%8B%B1%E8%AA%9E%E6%9A%91%E5%81%87%E4%BD%9C%E6%A5%AD-%E5%8B%95%E8%A9%9E%E4%B8%89%E6%85%8B%E8%A1%A8%E8%A4%87%E7%BF%92.pdf">
+                動詞三態表複習表
+            </a>
+        </div>
+        <div class="question mb-6">
+            <div id="verb" class="text-lg font-semibold mb-4 text-center"></div>
+            <div class="flex flex-col gap-4">
+                <label class="block">
+                    <span class="text-gray-700">過去式</span>
+                    <input type="text" id="past" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">過去分詞</span>
+                    <input type="text" id="pastParticiple" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
+                </label>
+                <div class="flex justify-between">
+                    <button onclick="checkAnswer()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">提交答案</button>
+                    <button onclick="nextQuestion()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">下一題</button>
+                    <button onclick="downloadWrongList()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">下載錯誤單字</button>
+                </div>
+            </div>
+        </div>
+        <div class="result text-center text-lg font-medium mb-4" id="result"></div>
+        <div class="wrong-list text-red-600" id="wrongList"></div>
+    </div>
+
+<script>
+const verbs =[
+  {
+    "topic": "規則變化：加-d",
+    "base": "agree",
+    "past": "agreed",
+    "pastParticiple": "agreed"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "arrive",
+    "past": "arrived",
+    "pastParticiple": "arrived"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "barbecue",
+    "past": "barbecued",
+    "pastParticiple": "barbecued"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "believe",
+    "past": "believed",
+    "pastParticiple": "believed"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "; cause",
+    "past": "; caused",
+    "pastParticiple": "; caused"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "close",
+    "past": "closed",
+    "pastParticiple": "closed"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "continue",
+    "past": "continued",
+    "pastParticiple": "continued"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "damage",
+    "past": "damaged",
+    "pastParticiple": "damaged"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "dance",
+    "past": "danced",
+    "pastParticiple": "danced"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "decide",
+    "past": "decided",
+    "pastParticiple": "decided"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "die",
+    "past": "died",
+    "pastParticiple": "died"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "donate",
+    "past": "donated",
+    "pastParticiple": "donated"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "excuse",
+    "past": "excused",
+    "pastParticiple": "excused"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "exercise",
+    "past": "exercised",
+    "pastParticiple": "exercised"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "1s experience",
+    "past": "1s experienced",
+    "pastParticiple": "1s experienced"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "graduate",
+    "past": "graduated",
+    "pastParticiple": "graduated"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "hate",
+    "past": "hated",
+    "pastParticiple": "hated"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "hike",
+    "past": "hiked",
+    "pastParticiple": "hiked"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "hope",
+    "past": "hoped",
+    "pastParticiple": "hoped"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "invite",
+    "past": "invited",
+    "pastParticiple": "invited"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "like",
+    "past": "liked",
+    "pastParticiple": "liked"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "live",
+    "past": "lived",
+    "pastParticiple": "lived"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "love",
+    "past": "loved",
+    "pastParticiple": "loved"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "»smove",
+    "past": "»smoved",
+    "pastParticiple": "»smoved"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "notice",
+    "past": "noticed",
+    "pastParticiple": "noticed"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "pollute",
+    "past": "polluted",
+    "pastParticiple": "polluted"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "practice",
+    "past": "practiced",
+    "pastParticiple": "practiced"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "prepare",
+    "past": "prepared",
+    "pastParticiple": "prepared"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "produce",
+    "past": "produced",
+    "pastParticiple": "produced"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "provide",
+    "past": "provided",
+    "pastParticiple": "provided"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "receive",
+    "past": "received",
+    "pastParticiple": "received"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "recycle",
+    "past": "recycled",
+    "pastParticiple": "recycled"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "reduce",
+    "past": "reduced",
+    "pastParticiple": "reduced"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "ss feuse",
+    "past": "ss feused",
+    "pastParticiple": "ss feused"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "save",
+    "past": "saved",
+    "pastParticiple": "saved"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "scare",
+    "past": "scared",
+    "pastParticiple": "scared"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "share",
+    "past": "shared",
+    "pastParticiple": "shared"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "smile",
+    "past": "smiled",
+    "pastParticiple": "smiled"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "store",
+    "past": "stored",
+    "pastParticiple": "stored"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "taste",
+    "past": "tasted",
+    "pastParticiple": "tasted"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "use",
+    "past": "used",
+    "pastParticiple": "used"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "welcome",
+    "past": "welcomed",
+    "pastParticiple": "welcomed"
+  },
+  {
+    "topic": "規則變化：加-d",
+    "base": "wipe",
+    "past": "wiped",
+    "pastParticiple": "wiped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "answer",
+    "past": "answered",
+    "pastParticiple": "answered"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "appear",
+    "past": "appeared",
+    "pastParticiple": "appeared"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "ask",
+    "past": "asked",
+    "pastParticiple": "asked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "bark",
+    "past": "barked",
+    "pastParticiple": "barked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "book",
+    "past": "booked",
+    "pastParticiple": "booked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "brush",
+    "past": "brushed",
+    "pastParticiple": "brushed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "bump",
+    "past": "bumped",
+    "pastParticiple": "bumped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "call",
+    "past": "called",
+    "pastParticiple": "called"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "camp",
+    "past": "camped",
+    "pastParticiple": "camped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "check",
+    "past": "checked",
+    "pastParticiple": "checked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "clean",
+    "past": "cleaned",
+    "pastParticiple": "cleaned"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "climb",
+    "past": "climbed",
+    "pastParticiple": "climbed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "collect",
+    "past": "collected",
+    "pastParticiple": "collected"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "color",
+    "past": "colored",
+    "pastParticiple": "colored"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "cook",
+    "past": "cooked",
+    "pastParticiple": "cooked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "count",
+    "past": "counted",
+    "pastParticiple": "counted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "design",
+    "past": "designed",
+    "pastParticiple": "designed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "destroy",
+    "past": "destroyed",
+    "pastParticiple": "destroyed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "dial",
+    "past": "dialed",
+    "pastParticiple": "dialed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "dream",
+    "past": "dreamed",
+    "pastParticiple": "dreamed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "dress",
+    "past": "dressed",
+    "pastParticiple": "dressed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "enjoy",
+    "past": "enjoyed",
+    "pastParticiple": "enjoyed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "enter",
+    "past": "entered",
+    "pastParticiple": "entered"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "fix",
+    "past": "fixed",
+    "pastParticiple": "fixed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "follow",
+    "past": "followed",
+    "pastParticiple": "followed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "form",
+    "past": "formed",
+    "pastParticiple": "formed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "guess",
+    "past": "guessed",
+    "pastParticiple": "guessed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "hand",
+    "past": "handed",
+    "pastParticiple": "handed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "happen",
+    "past": "happened",
+    "pastParticiple": "happened"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "help",
+    "past": "helped",
+    "pastParticiple": "helped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "join",
+    "past": "joined",
+    "pastParticiple": "joined"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "jump",
+    "past": "jumped",
+    "pastParticiple": "jumped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "knock",
+    "past": "knocked",
+    "pastParticiple": "knocked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "learn",
+    "past": "learned",
+    "pastParticiple": "learned"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "light",
+    "past": "lighted",
+    "pastParticiple": "lighted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "listen",
+    "past": "listened",
+    "pastParticiple": "listened"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "look",
+    "past": "looked",
+    "pastParticiple": "looked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "miss",
+    "past": "missed",
+    "pastParticiple": "missed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "need",
+    "past": "needed",
+    "pastParticiple": "needed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "open",
+    "past": "opened",
+    "pastParticiple": "opened"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "order",
+    "past": "ordered",
+    "pastParticiple": "ordered"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "pack",
+    "past": "packed",
+    "pastParticiple": "packed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "P",
+    "past": "Ped",
+    "pastParticiple": "Ped"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "pick",
+    "past": "picked",
+    "pastParticiple": "picked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "plant",
+    "past": "planted",
+    "pastParticiple": "planted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "play",
+    "past": "played",
+    "pastParticiple": "played"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "preview",
+    "past": "previewed",
+    "pastParticiple": "previewed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "pull",
+    "past": "pulled",
+    "pastParticiple": "pulled"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "push",
+    "past": "pushed",
+    "pastParticiple": "pushed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "rain",
+    "past": "rained",
+    "pastParticiple": "rained"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "relax",
+    "past": "relaxed",
+    "pastParticiple": "relaxed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "remember",
+    "past": "remembered",
+    "pastParticiple": "remembered"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "repeat",
+    "past": "repeated",
+    "pastParticiple": "repeated"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "rest",
+    "past": "rested",
+    "pastParticiple": "rested"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "return",
+    "past": "returned",
+    "pastParticiple": "returned"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "review",
+    "past": "reviewed",
+    "pastParticiple": "reviewed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "roll",
+    "past": "rolled",
+    "pastParticiple": "rolled"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "scold",
+    "past": "scolded",
+    "pastParticiple": "scolded"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "shout",
+    "past": "shouted",
+    "pastParticiple": "shouted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "show",
+    "past": "showed",
+    "pastParticiple": "showed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "smell",
+    "past": "smelled",
+    "pastParticiple": "smelled"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "sort",
+    "past": "sorted",
+    "pastParticiple": "sorted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "sound",
+    "past": "sounded",
+    "pastParticiple": "sounded"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "“spell",
+    "past": "“spelled",
+    "pastParticiple": "“spelled"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "start",
+    "past": "started",
+    "pastParticiple": "started"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "stay",
+    "past": "stayed",
+    "pastParticiple": "stayed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "stretch",
+    "past": "stretched",
+    "pastParticiple": "stretched"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "sunburn",
+    "past": "sunburned",
+    "pastParticiple": "sunburned"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "surf",
+    "past": "surfed",
+    "pastParticiple": "surfed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "talk",
+    "past": "talked",
+    "pastParticiple": "talked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "thank",
+    "past": "thanked",
+    "pastParticiple": "thanked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "touch",
+    "past": "touched",
+    "pastParticiple": "touched"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "travel",
+    "past": "traveled",
+    "pastParticiple": "traveled"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "turn",
+    "past": "turned",
+    "pastParticiple": "turned"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "visit",
+    "past": "visited",
+    "pastParticiple": "visited"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "volunteer",
+    "past": "volunteered",
+    "pastParticiple": "volunteered"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "wait",
+    "past": "waited",
+    "pastParticiple": "waited"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "walk",
+    "past": "walked",
+    "pastParticiple": "walked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "want",
+    "past": "wanted",
+    "pastParticiple": "wanted"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "wash",
+    "past": "washed",
+    "pastParticiple": "washed"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "wish",
+    "past": "wished",
+    "pastParticiple": "wished"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "work",
+    "past": "worked",
+    "pastParticiple": "worked"
+  },
+  {
+    "topic": "規則變化：加-ed",
+    "base": "watch",
+    "past": "watched",
+    "pastParticiple": "watched"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "chat",
+    "past": "chatted",
+    "pastParticiple": "chatted"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "jog",
+    "past": "jogged",
+    "pastParticiple": "jogged"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "mop",
+    "past": "mopped",
+    "pastParticiple": "mopped"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "picnic",
+    "past": "picnicked",
+    "pastParticiple": "picnicked"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "plan",
+    "past": "planned",
+    "pastParticiple": "planned"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "shop",
+    "past": "shopped",
+    "pastParticiple": "shopped"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "skip",
+    "past": "skipped",
+    "pastParticiple": "skipped"
+  },
+  {
+    "topic": "規則變化：重複字尾加-ed",
+    "base": "stop",
+    "past": "stopped",
+    "pastParticiple": "stopped"
+  },
+    {
+    "topic": "不規則變化：A-A-A型",
+    "base": "cost",
+    "past": "cost",
+    "pastParticiple": "cost"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "cut",
+    "past": "cut",
+    "pastParticiple": "cut"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "hit",
+    "past": "hit",
+    "pastParticiple": "hit"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "hurt",
+    "past": "hurt",
+    "pastParticiple": "hurt"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "let",
+    "past": "let",
+    "pastParticiple": "let"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "put",
+    "past": "put",
+    "pastParticiple": "put"
+  },
+  {
+    "topic": "不規則變化：A-A-A型",
+    "base": "read",
+    "past": "read",
+    "pastParticiple": "read"
+  },
+   {
+    "topic": "不規則變化：A-B-A型",
+    "base": "come",
+    "past": "came",
+    "pastParticiple": "come"
+  },
+   {
+    "topic": "不規則變化：A-B-A型",
+    "base": "become",
+    "past": "became",
+    "pastParticiple": "become"
+  },
+  {
+    "topic": "不規則變化：A-B-A型",
+    "base": "run",
+    "past": "ran",
+    "pastParticiple": "run"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "bring",
+    "past": "brought",
+    "pastParticiple": "brought"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "build",
+    "past": "built",
+    "pastParticiple": "built"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "buy",
+    "past": "bought",
+    "pastParticiple": "bought"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "catch",
+    "past": "caught",
+    "pastParticiple": "caught"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "dig",
+    "past": "dug",
+    "pastParticiple": "dug"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "dream",
+    "past": "dreamt",
+    "pastParticiple": "dreamt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "feed",
+    "past": "fed",
+    "pastParticiple": "fed"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "feel",
+    "past": "felt",
+    "pastParticiple": "felt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "fight",
+    "past": "fought",
+    "pastParticiple": "fought"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "find",
+    "past": "found",
+    "pastParticiple": "found"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "forget",
+    "past": "forgot",
+    "pastParticiple": "forgotten"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "have",
+    "past": "had",
+    "pastParticiple": "had"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "hear",
+    "past": "heard",
+    "pastParticiple": "heard"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "hold",
+    "past": "held",
+    "pastParticiple": "held"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "keep",
+    "past": "kept",
+    "pastParticiple": "kept"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "lead",
+    "past": "led",
+    "pastParticiple": "led"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "learn",
+    "past": "learnt",
+    "pastParticiple": "learnt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "leave",
+    "past": "left",
+    "pastParticiple": "left"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "lend",
+    "past": "lent",
+    "pastParticiple": "lent"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "light",
+    "past": "lit",
+    "pastParticiple": "lit"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "lose",
+    "past": "lost",
+    "pastParticiple": "lost"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "make",
+    "past": "made",
+    "pastParticiple": "made"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "mean",
+    "past": "meant",
+    "pastParticiple": "meant"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "meet",
+    "past": "met",
+    "pastParticiple": "met"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "pay",
+    "past": "paid",
+    "pastParticiple": "paid"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "say",
+    "past": "said",
+    "pastParticiple": "said"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "sell",
+    "past": "sold",
+    "pastParticiple": "sold"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "send",
+    "past": "sent",
+    "pastParticiple": "sent"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "shoot",
+    "past": "shot",
+    "pastParticiple": "shot"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "sit",
+    "past": "sat",
+    "pastParticiple": "sat"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "sleep",
+    "past": "slept",
+    "pastParticiple": "slept"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "smell",
+    "past": "smelt",
+    "pastParticiple": "smelt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "spell",
+    "past": "spelt",
+    "pastParticiple": "spelt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "spend",
+    "past": "spent",
+    "pastParticiple": "spent"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "stand",
+    "past": "stood",
+    "pastParticiple": "stood"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "sunburn",
+    "past": "sunburnt",
+    "pastParticiple": "sunburnt"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "teach",
+    "past": "taught",
+    "pastParticiple": "taught"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "tell",
+    "past": "told",
+    "pastParticiple": "told"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "think",
+    "past": "thought",
+    "pastParticiple": "thought"
+  },
+  {
+    "topic": "不規則變化：A-B-B型",
+    "base": "win",
+    "past": "won",
+    "pastParticiple": "won"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "be",
+    "past": "was/were",
+    "pastParticiple": "been"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "bite",
+    "past": "bit",
+    "pastParticiple": "bitten"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "blow",
+    "past": "blew",
+    "pastParticiple": "blown"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "break",
+    "past": "broke",
+    "pastParticiple": "broken"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "choose",
+    "past": "chose",
+    "pastParticiple": "chosen"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "make",
+    "past": "made",
+    "pastParticiple": "made"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "do",
+    "past": "did",
+    "pastParticiple": "done"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "draw",
+    "past": "drew",
+    "pastParticiple": "drawn"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "drink",
+    "past": "drank",
+    "pastParticiple": "drunk"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "drive",
+    "past": "drove",
+    "pastParticiple": "driven"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "eat",
+    "past": "ate",
+    "pastParticiple": "eaten"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "fall",
+    "past": "fell",
+    "pastParticiple": "fallen"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "fly",
+    "past": "flew",
+    "pastParticiple": "flown"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "get",
+    "past": "got",
+    "pastParticiple": "gotten"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "give",
+    "past": "gave",
+    "pastParticiple": "given"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "go",
+    "past": "went",
+    "pastParticiple": "gone"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "grow",
+    "past": "grew",
+    "pastParticiple": "grown"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "hide",
+    "past": "hid",
+    "pastParticiple": "hidden"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "lie",
+    "past": "lay",
+    "pastParticiple": "lain"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "ride",
+    "past": "rode",
+    "pastParticiple": "ridden"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "see",
+    "past": "saw",
+    "pastParticiple": "seen"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "shake",
+    "past": "shook",
+    "pastParticiple": "shaken"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "show",
+    "past": "showed",
+    "pastParticiple": "shown"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "sing",
+    "past": "sang",
+    "pastParticiple": "sung"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "speak",
+    "past": "spoke",
+    "pastParticiple": "spoken"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "swim",
+    "past": "swam",
+    "pastParticiple": "swum"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "take",
+    "past": "took",
+    "pastParticiple": "taken"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "throw",
+    "past": "threw",
+    "pastParticiple": "thrown"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "wake",
+    "past": "woke",
+    "pastParticiple": "woken"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "wear",
+    "past": "wore",
+    "pastParticiple": "worn"
+  },
+  {
+    "topic": "不規則變化：A-B-C型",
+    "base": "write",
+    "past": "wrote",
+    "pastParticiple": "written"
+  }
+
+]
+
+let availableVerbs = [...verbs];
+let currentVerb = {};
+let wrongAnswers = [];
+
+function nextQuestion() {
+    clearResult();
+    if (availableVerbs.length === 0) {
+        document.getElementById('verb').innerText = '🎉 恭喜，所有單字都測驗過了！';
+        document.getElementById('past').style.display = 'none';
+        document.getElementById('pastParticiple').style.display = 'none';
+        return;
+    }
+    const randomIndex = Math.floor(Math.random() * availableVerbs.length);
+    currentVerb = availableVerbs[randomIndex];
+    availableVerbs.splice(randomIndex, 1);
+
+    document.getElementById('verb').innerText = `原形: ${currentVerb.base}`;
+    document.getElementById('past').value = '';
+    document.getElementById('pastParticiple').value = '';
+}
+
+function checkAnswer() {
+    clearResult();
+    const past = document.getElementById('past').value.trim().toLowerCase();
+    const pastParticiple = document.getElementById('pastParticiple').value.trim().toLowerCase();
+
+    let resultText = '';
+    if (past === currentVerb.past && pastParticiple === currentVerb.pastParticiple) {
+        resultText = '✅ 恭喜你答對了！';
+    } else {
+        resultText = `❌ 答錯了！正確答案是：過去式 ${currentVerb.past}，過去分詞 ${currentVerb.pastParticiple}`;
+        wrongAnswers.push({
+            base: currentVerb.base,
+            correctPast: currentVerb.past,
+            correctPastParticiple: currentVerb.pastParticiple,
+            yourPast: past,
+            yourPastParticiple: pastParticiple
+        });
+        updateWrongList();
+    }
+    document.getElementById('result').innerText = resultText;
+}
+
+function clearResult() {
+    html=""
+    document.getElementById('result').innerText = '';
+    wrongAnswers = [];
+    document.getElementById('wrongList').innerHTML = '';
+}
+
+function updateWrongList() {
+    const wrongListDiv = document.getElementById('wrongList');
+    let html = '<h3 class="text-xl font-semibold mb-2">錯誤記錄</h3><ul class="list-disc list-inside">';
+    for (const item of wrongAnswers) {
+        html += `<li>${item.base}: 過去式「${item.yourPast}」，正確是「${item.correctPast}」；\r\n過去分詞「${item.yourPastParticiple}」，正確是「${item.correctPastParticiple}」</li>`;
+    }
+    html += '</ul>';
+    wrongListDiv.innerHTML = html;
+}
+
+function downloadWrongList() {
+    let content = '';
+    for (const item of wrongAnswers) {
+        content += `${item.base}, ${item.correctPast}, ${item.correctPastParticiple}\n`;
+    }
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'wrong_verbs_list.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// 初始載入
+nextQuestion();
+</script>
+</body>
+</html>
