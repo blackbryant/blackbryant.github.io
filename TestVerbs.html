@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>動詞三態測驗</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="text"] {
+            text-transform: lowercase;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="bg-white p-10 rounded shadow-md w-full max-w-lg">
@@ -14,15 +19,29 @@
             </a>
         </div>
         <div class="question mb-6">
+            <div class="mb-4">
+                <label for="topicSelect" class="block text-gray-700">選擇主題：</label>
+                <select id="topicSelect" onchange="filterByTopic()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    <option value="all">全部</option>
+                    <option value="規則變化：加-d">規則變化：加-d</option>
+                    <option value="規則變化：加-ed">規則變化：加-ed</option>
+                    <option value="規則變化：重複字尾加-ed">規則變化：重複字尾加-ed</option>
+                    <option value="不規則變化：A-A-A型">不規則變化：A-A-A型</option>
+                    <option value="不規則變化：A-B-A型">不規則變化：A-B-A型</option>
+                    <option value="不規則變化：A-B-B型">不規則變化：A-B-B型</option>
+                    <option value="不規則變化：A-B-C型">不規則變化：A-B-C型</option>
+
+                </select>
+            </div>
             <div id="verb" class="text-lg font-semibold mb-4 text-center"></div>
             <div class="flex flex-col gap-4">
                 <label class="block">
                     <span class="text-gray-700">過去式</span>
-                    <input type="text" id="past" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
+                    <input type="text" id="past" class="text-lg p-3 mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
                 </label>
                 <label class="block">
                     <span class="text-gray-700">過去分詞</span>
-                    <input type="text" id="pastParticiple" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
+                    <input type="text" id="pastParticiple" class="text-lg p-3 mt-1 block w-full rounded-md border-gray-300 shadow-sm" oninput="clearResult()" />
                 </label>
                 <div class="flex justify-between">
                     <button onclick="checkAnswer()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">提交答案</button>
@@ -36,7 +55,8 @@
     </div>
 
 <script>
-const verbs =[
+const verbs =
+[
   {
     "topic": "規則變化：加-d",
     "base": "agree",
@@ -123,8 +143,8 @@ const verbs =[
   },
   {
     "topic": "規則變化：加-d",
-    "base": "1s experience",
-    "past": "1s experienced",
+    "base": "experience",
+    "past": "experienced",
     "pastParticiple": "1s experienced"
   },
   {
@@ -177,8 +197,8 @@ const verbs =[
   },
   {
     "topic": "規則變化：加-d",
-    "base": "»smove",
-    "past": "»smoved",
+    "base": "smove",
+    "past": "smoved",
     "pastParticiple": "»smoved"
   },
   {
@@ -237,9 +257,9 @@ const verbs =[
   },
   {
     "topic": "規則變化：加-d",
-    "base": "ss feuse",
-    "past": "ss feused",
-    "pastParticiple": "ss feused"
+    "base": "reuse",
+    "past": "reused",
+    "pastParticiple": "reused"
   },
   {
     "topic": "規則變化：加-d",
@@ -549,9 +569,9 @@ const verbs =[
   },
   {
     "topic": "規則變化：加-ed",
-    "base": "P",
-    "past": "Ped",
-    "pastParticiple": "Ped"
+    "base": "paint",
+    "past": "painted",
+    "pastParticiple": "painted"
   },
   {
     "topic": "規則變化：加-ed",
@@ -1329,10 +1349,34 @@ const verbs =[
   }
 
 ]
+  
 
+let filteredVerbs = [...verbs];
 let availableVerbs = [...verbs];
 let currentVerb = {};
 let wrongAnswers = [];
+
+function initializeTopicOptions() {
+    const topics = [...new Set(verbs.map(v => v.topic))];
+    const select = document.getElementById('topicSelect');
+    topics.forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        select.appendChild(option);
+    });
+}
+
+function filterByTopic() {
+    const selectedTopic = document.getElementById('topicSelect').value;
+    if (selectedTopic === 'all') {
+        filteredVerbs = [...verbs];
+    } else {
+        filteredVerbs = verbs.filter(v => v.topic === selectedTopic);
+    }
+    availableVerbs = [...filteredVerbs];
+    nextQuestion();
+}
 
 function nextQuestion() {
     clearResult();
@@ -1384,7 +1428,7 @@ function updateWrongList() {
     const wrongListDiv = document.getElementById('wrongList');
     let html = '<h3 class="text-xl font-semibold mb-2">錯誤記錄</h3><ul class="list-disc list-inside">';
     for (const item of wrongAnswers) {
-        html += `<li>${item.base}: 過去式「${item.yourPast}」，正確是「${item.correctPast}」；\r\n過去分詞「${item.yourPastParticiple}」，正確是「${item.correctPastParticiple}」</li>`;
+        html += `<li>${item.base}: 過去式正確是「${item.correctPast}」；\r\n 過去分詞正確是「${item.correctPastParticiple}」</li>`;
     }
     html += '</ul>';
     wrongListDiv.innerHTML = html;
