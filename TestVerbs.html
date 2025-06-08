@@ -1355,6 +1355,7 @@ let filteredVerbs = [...verbs];
 let availableVerbs = [...verbs];
 let currentVerb = {};
 let wrongAnswers = [];
+let allWrongAnswers=[];
 
 function initializeTopicOptions() {
     const topics = [...new Set(verbs.map(v => v.topic))];
@@ -1405,13 +1406,16 @@ function checkAnswer() {
         resultText = '✅ 恭喜你答對了！';
     } else {
         resultText = `❌ 答錯了！正確答案是：過去式 ${currentVerb.past}，過去分詞 ${currentVerb.pastParticiple}`;
-        wrongAnswers.push({
+         const errorRecord = {
             base: currentVerb.base,
             correctPast: currentVerb.past,
             correctPastParticiple: currentVerb.pastParticiple,
             yourPast: past,
             yourPastParticiple: pastParticiple
-        });
+        };
+        
+        wrongAnswers.push(errorRecord);  // 這次測驗中的錯誤
+        allWrongAnswers.push(errorRecord);     // 所有累積的錯誤
         updateWrongList();
     }
     document.getElementById('result').innerText = resultText;
@@ -1436,7 +1440,7 @@ function updateWrongList() {
 
 function downloadWrongList() {
     let content = '';
-    for (const item of wrongAnswers) {
+    for (const item of allWrongAnswers) {
         content += `${item.base}, ${item.correctPast}, ${item.correctPastParticiple}\n`;
     }
     const blob = new Blob([content], { type: 'text/plain' });
