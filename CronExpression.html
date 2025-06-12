@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cron 多 Tab 產生器（含年欄位驗證）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4">
+  <div class="bg-white shadow rounded-lg p-6 w-full max-w-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Cron 表達式產生器</h1>
+    
+    <!-- Tab 切換按鈕 -->
+    <div class="mb-6 border-b border-gray-300">
+      <nav class="flex space-x-4" aria-label="Tabs" id="tabs">
+        <button class="tab-button py-2 px-4 text-blue-600 border-b-2 border-blue-600 font-semibold" data-tab="sec">秒</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="min">分</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="hour">時</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="day">日</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="month">月</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="week">週</button>
+        <button class="tab-button py-2 px-4 text-gray-600 hover:text-blue-600" data-tab="year">年</button>
+      </nav>
+    </div>
+
+    <!-- Tab 內容區 -->
+    <div id="tabContents" class="space-y-6">
+      <!-- 秒 Tab -->
+      <div class="tab-content" data-tab="sec">
+        <div class="space-y-4">
+          <div>
+            <label class="block font-semibold mb-1">選擇秒數模式：</label>
+            <select id="secModeSelect" class="border rounded w-full p-2">
+              <option value="every">每秒</option>
+              <option value="range">範圍秒數（例如 1-5）</option>
+              <option value="interval">間隔秒數（從0秒開始每隔幾秒）</option>
+              <option value="specific">指定秒數（逗號分隔）</option>
+            </select>
+          </div>
+
+          <div id="secRangeInputs" class="hidden space-y-2">
+            <label class="block">開始秒數：</label>
+            <input type="number" id="secRangeStart" class="border rounded w-full p-2" min="0" max="58" placeholder="例如：1">
+            <label class="block">結束秒數：</label>
+            <input type="number" id="secRangeEnd" class="border rounded w-full p-2" min="1" max="59" placeholder="例如：5">
+          </div>
+
+          <div id="secIntervalInput" class="hidden space-y-2">
+            <label class="block">間隔秒數：</label>
+            <input type="number" id="secInterval" class="border rounded w-full p-2" min="1" max="59" placeholder="例如：5">
+          </div>
+
+          <div id="secSpecificInput" class="hidden space-y-2">
+            <label class="block">指定秒數（逗號分隔）：</label>
+            <input type="text" id="secSpecific" class="border rounded w-full p-2" placeholder="例如：0,15,30,45">
+          </div>
+        </div>
+      </div>
+
+      <!-- 分 Tab -->
+      <div class="tab-content hidden" data-tab="min">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定分（0~59，逗號分隔）：</label>
+          <input type="text" id="minInput" class="border rounded w-full p-2" placeholder="例如：0,15,30,45">
+        </div>
+      </div>
+
+      <!-- 時 Tab -->
+      <div class="tab-content hidden" data-tab="hour">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定時（0~23，逗號分隔）：</label>
+          <input type="text" id="hourInput" class="border rounded w-full p-2" placeholder="例如：0,8,12,18">
+        </div>
+      </div>
+
+      <!-- 日 Tab -->
+      <div class="tab-content hidden" data-tab="day">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定日（1~31，逗號分隔）：</label>
+          <input type="text" id="dayInput" class="border rounded w-full p-2" placeholder="例如：1,15,31">
+        </div>
+      </div>
+
+      <!-- 月 Tab -->
+      <div class="tab-content hidden" data-tab="month">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定月（1~12，逗號分隔）：</label>
+          <input type="text" id="monthInput" class="border rounded w-full p-2" placeholder="例如：1,6,12">
+        </div>
+      </div>
+
+      <!-- 週 Tab -->
+      <div class="tab-content hidden" data-tab="week">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定週（0~7，逗號分隔，0和7都代表星期日）：</label>
+          <input type="text" id="weekInput" class="border rounded w-full p-2" placeholder="例如：0,3,5">
+        </div>
+      </div>
+
+      <!-- 年 Tab -->
+      <div class="tab-content hidden" data-tab="year">
+        <div class="space-y-4">
+          <label class="block font-semibold mb-1">設定年（西元年，逗號分隔）：</label>
+          <input type="text" id="yearInput" class="border rounded w-full p-2" placeholder="例如：2023,2024,2025">
+        </div>
+      </div>
+    </div>
+
+    <button id="generateBtn" class="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700">產生 Cron 表達式</button>
+    <button id="resetInputsBtn" class="mt-2 bg-gray-400 text-white px-4 py-2 rounded w-full hover:bg-gray-500">
+      重置輸入欄
+    </button>
+    
+    <div class="mt-6 space-y-2">
+      <label class="block font-semibold">完整 Cron 表達式：</label>
+      <input id="fullExpression" class="border rounded w-full p-2 bg-gray-100" readonly>
+      
+
+      <div class="grid grid-cols-3 gap-4 text-sm mt-2">
+        <div><strong>秒：</strong><span id="secPart"></span></div>
+        <div><strong>分：</strong><span id="minPart"></span></div>
+        <div><strong>時：</strong><span id="hourPart"></span></div>
+        <div><strong>日：</strong><span id="dayPart"></span></div>
+        <div><strong>月：</strong><span id="monthPart"></span></div>
+        <div><strong>週：</strong><span id="weekPart"></span></div>
+        <div><strong>年：</strong><span id="yearPart"></span></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Tab 切換功能
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-tab');
+
+      tabButtons.forEach(b => {
+        b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+        b.classList.add('text-gray-600');
+      });
+
+      btn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+      btn.classList.remove('text-gray-600');
+
+      tabContents.forEach(tc => {
+        tc.classList.toggle('hidden', tc.getAttribute('data-tab') !== targetTab);
+      });
+    });
+  });
+
+  // 秒數模式選擇控制顯示
+  const secModeSelect = document.getElementById('secModeSelect');
+  const secRangeInputs = document.getElementById('secRangeInputs');
+  const secIntervalInput = document.getElementById('secIntervalInput');
+  const secSpecificInput = document.getElementById('secSpecificInput');
+  const resetInputsBtn = document.getElementById('resetInputsBtn');
+
+  secModeSelect.addEventListener('change', () => {
+    secRangeInputs.classList.add('hidden');
+    secIntervalInput.classList.add('hidden');
+    secSpecificInput.classList.add('hidden');
+
+    switch (secModeSelect.value) {
+      case 'range':
+        secRangeInputs.classList.remove('hidden');
+        break;
+      case 'interval':
+        secIntervalInput.classList.remove('hidden');
+        break;
+      case 'specific':
+        secSpecificInput.classList.remove('hidden');
+        break;
+    }
+  });
+
+  // 預設載入時觸發一次切換
+  secModeSelect.dispatchEvent(new Event('change'));
+
+  // 產生 Cron 表達式並驗證西元年
+  const generateBtn = document.getElementById('generateBtn');
+  const fullExpression = document.getElementById('fullExpression');
+
+  const secPart = document.getElementById('secPart');
+  const minPart = document.getElementById('minPart');
+  const hourPart = document.getElementById('hourPart');
+  const dayPart = document.getElementById('dayPart');
+  const monthPart = document.getElementById('monthPart');
+  const weekPart = document.getElementById('weekPart');
+  const yearPart = document.getElementById('yearPart');
+
+  generateBtn.addEventListener('click', () => {
+    // 年欄位驗證
+    const yearRaw = document.getElementById('yearInput').value.trim();
+
+    if (yearRaw !== '') {
+      const years = yearRaw.split(',').map(y => y.trim());
+      const invalidYear = years.find(y => {
+        return !/^\d{4}$/.test(y) || Number(y) < 1970 || Number(y) > 2100;
+      });
+      if (invalidYear) {
+        alert(`年欄位包含無效年份：${invalidYear}。請輸入 1970~2100 之間的西元年。`);
+        return;  // 停止產生
+      }
+    }
+
+    // 秒數
+    let sec = '*';
+    switch (secModeSelect.value) {
+      case 'every':
+        sec = '*';
+        break;
+      case 'range':
+        const start = document.getElementById('secRangeStart').value || '0';
+        const end = document.getElementById('secRangeEnd').value || '1';
+        sec = `${start}-${end}`;
+        break;
+      case 'interval':
+        const interval = document.getElementById('secInterval').value || '1';
+        sec = `0/${interval}`;
+        break;
+      case 'specific':
+        const specific = document.getElementById('secSpecific').value || '0';
+        sec = specific;
+        break;
+    }
+
+    // 其他欄位
+    const min = document.getElementById('minInput').value.trim() || '*';
+    const hour = document.getElementById('hourInput').value.trim() || '*';
+    const day = document.getElementById('dayInput').value.trim() || '*';
+    const month = document.getElementById('monthInput').value.trim() || '*';
+    const week = document.getElementById('weekInput').value.trim() || '*';
+    const year = yearRaw === '' ? '*' : yearRaw;
+
+    // 組合 Cron
+    const cron = `${sec} ${min} ${hour} ${day} ${month} ${week} ${year}`;
+    fullExpression.value = cron;
+
+    // 顯示拆解部分
+    secPart.textContent = sec;
+    minPart.textContent = min;
+    hourPart.textContent = hour;
+    dayPart.textContent = day;
+    monthPart.textContent = month;
+    weekPart.textContent = week;
+    yearPart.textContent = year;
+  });
+  function clearInputsOnly() {
+  // 秒數模式下的所有輸入
+  document.getElementById('secRangeStart').value = '';
+  document.getElementById('secRangeEnd').value = '';
+  document.getElementById('secInterval').value = '';
+  document.getElementById('secSpecific').value = '';
+  secModeSelect.value = 'every';
+  secModeSelect.dispatchEvent(new Event('change'));
+
+  // 其他欄位清空
+  document.getElementById('minInput').value = '';
+  document.getElementById('hourInput').value = '';
+  document.getElementById('dayInput').value = '';
+  document.getElementById('monthInput').value = '';
+  document.getElementById('weekInput').value = '';
+  document.getElementById('yearInput').value = '';
+  }
+
+  resetInputsBtn.addEventListener('click', () => {
+    clearInputsOnly();
+  });
+
+
+</script>
+</body>
+</html>
