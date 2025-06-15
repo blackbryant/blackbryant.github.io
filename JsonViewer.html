@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON WebViewer</title>
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .json-key {
+      color: #c678dd;
+    }
+
+    .json-value {
+      color: #61afef;
+    }
+
+    .json-string {
+      color: #98c379;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 p-4">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">JSON WebViewer</h1>
+    <div class="border-b mb-4">
+      <nav class="flex space-x-2">
+        <button id="viewerTab" class="tab-btn px-4 py-2 text-blue-600 border-b-2 border-blue-600">Viewer</button>
+        <button id="textTab" class="tab-btn px-4 py-2 text-gray-600">Text</button>
+        <button id="figureTab" class="tab-btn px-4 py-2 text-gray-600">Figure</button>
+      </nav>
+    </div>
+
+    <div id="viewerContent" class="bg-white p-4 rounded shadow overflow-auto h-96 text-sm whitespace-pre-wrap font-mono"></div>
+
+    <div id="textContent" class="hidden">
+      <textarea id="jsonInput" class="w-full h-96 p-4 rounded shadow resize-none font-mono text-sm" placeholder="Paste your JSON here..."></textarea>
+      <button id="parseBtn" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Parse JSON</button>
+    </div>
+
+    <div id="figureContent" class="hidden bg-white p-4 rounded shadow h-96 overflow-auto">
+      <div id="jsonTree"></div>
+    </div>
+  </div>
+
+  <script>
+    const viewerTab = document.getElementById('viewerTab');
+    const textTab = document.getElementById('textTab');
+    const figureTab = document.getElementById('figureTab');
+    const viewerContent = document.getElementById('viewerContent');
+    const textContent = document.getElementById('textContent');
+    const figureContent = document.getElementById('figureContent');
+    const jsonInput = document.getElementById('jsonInput');
+    const parseBtn = document.getElementById('parseBtn');
+    const jsonTree = document.getElementById('jsonTree');
+
+    function showTab(tab) {
+      viewerContent.classList.add('hidden');
+      textContent.classList.add('hidden');
+      figureContent.classList.add('hidden');
+
+      viewerTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+      textTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+      figureTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+
+      tab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+    }
+
+    viewerTab.addEventListener('click', () => {
+      showTab(viewerTab);
+      viewerContent.classList.remove('hidden');
+    });
+
+    textTab.addEventListener('click', () => {
+      showTab(textTab);
+      textContent.classList.remove('hidden');
+    });
+
+    figureTab.addEventListener('click', () => {
+      showTab(figureTab);
+      figureContent.classList.remove('hidden');
+    });
+
+    parseBtn.addEventListener('click', () => {
+      try {
+        const json = JSON.parse(jsonInput.value);
+        viewerContent.innerHTML = formatJson(json);
+        jsonTree.innerHTML = '';
+        drawTree(json, jsonTree);
+        viewerTab.click();
+      } catch (e) {
+        alert('Invalid JSON');
+      }
+    });
+
+    function formatJson(obj, indent = 0) {
+      const spacing = '  '.repeat(indent);
+      if (typeof obj === 'object' && obj !== null) {
+        if (Array.isArray(obj)) {
+          return '[\n' + obj.map(item => spacing + '  ' + formatJson(item, indent + 1)).join(',\n') + '\n' + spacing + ']';
+        } else {
+          return '{\n' + Object.entries(obj).map(([key, val]) => {
+            return spacing + '  ' + `<span class="json-key">"${key}"</span>: ` + formatJson(val, indent + 1);
+          }).join(',\n') + '\n' + spacing + '}';
+        }
+      } else if (typeof obj === 'string') {
+        return `<span class="json-string">"${obj}"</span>`;
+      } else {
+        return `<span class="json-value">${obj}</span>`;
+      }
+    }
+
+    function drawTree(obj, container, level = 0) {
+      const ul = document.createElement('ul');
+      ul.className = 'pl-4 list-none';
+      const typeLabel = Array.isArray(obj) ? '[Array]' : '{Object}';
+      const root = document.createElement('li');
+      root.innerHTML = `<button class='toggle-btn text-xs text-white bg-gray-500 rounded px-2 mr-2'>-</button><strong>${typeLabel}</strong>`;
+      const childContainer = document.createElement('ul');
+      childContainer.className = 'pl-4';
+
+      for (const key in obj) {
+        const li = document.createElement('li');
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          drawTree(obj[key], li, level + 1);
+          li.insertAdjacentHTML('afterbegin', `<span class="font-semibold">${key}</span>: `);
+        } else {
+          li.innerHTML = `<span class="font-semibold">${key}</span>: <span class="text-blue-600">${obj[key]}</span>`;
+        }
+        childContainer.appendChild(li);
+      }
+
+      const toggleBtn = root.querySelector('.toggle-btn');
+      toggleBtn.addEventListener('click', () => {
+        childContainer.classList.toggle('hidden');
+        toggleBtn.textContent = childContainer.classList.contains('hidden') ? '+' : '-';
+      });
+
+      root.appendChild(childContainer);
+      ul.appendChild(root);
+      container.appendChild(ul);
+    }
+  </script>
+</body>
+
+</html>
