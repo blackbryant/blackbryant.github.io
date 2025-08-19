@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <title>字卡練習</title>
+  <style>
+    body { display:grid;place-items:center;min-height:100vh;background:#f6f7fb;font-family:sans-serif }
+    .card { width:600px; height:300px; perspective:1000px; cursor:pointer }
+    .card-inner { width:100%; height:100%; position:relative; transition:transform 0.6s; transform-style:preserve-3d }
+    .card.is-flipped .card-inner { transform:rotateY(180deg) }
+    .face { position:absolute; inset:0; display:grid; place-items:center; background:#fff; border:1px solid #ccc; border-radius:12px;
+            box-shadow:0 8px 20px rgba(0,0,0,.1); font-size:130px; backface-visibility:hidden }
+    .back { transform:rotateY(180deg) }
+    .controls { margin-top:20px; display:flex; gap:10px }
+    .btn { padding:8px 16px; border:none; border-radius:6px; background:#2563eb; color:white; font-size:24px; cursor:pointer }
+    .btn:hover { background:#1e40af }
+    .info { margin-top:5px; font-size:36px; color:#333 }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="card-inner">
+      <div class="face front" id="front">cat</div>
+      <div class="face back" id="back">kæt</div>
+    </div>
+  </div>
+
+  <div class="info" id="typeInfo">母音類型: 短母音</div>
+
+  <div class="controls">
+    <button class="btn" id="prevBtn">上一張</button>
+    <button class="btn" id="nextBtn">下一張</button>
+  </div>
+
+   
+  <script>
+  // dictionary.js
+	const dictionary = [
+	  { word: "cat", phonetic: "kæt", type: "短母音" },
+	  { word: "bed", phonetic: "bɛd", type: "短母音" },
+	  { word: "pig", phonetic: "pɪg", type: "短母音" },
+	  { word: "hot", phonetic: "hɑt", type: "短母音" },
+	  { word: "sun", phonetic: "sʌn", type: "短母音" },
+
+	  { word: "cake", phonetic: "keɪk", type: "Magic E" },
+	  { word: "bike", phonetic: "baɪk", type: "Magic E" },
+	  { word: "rope", phonetic: "roʊp", type: "Magic E" },
+	  { word: "cube", phonetic: "kjuːb", type: "Magic E" },
+	  { word: "flute", phonetic: "fluːt", type: "Magic E" },
+	  
+	   { word: "blue", phonetic: "bluː", type: "Vowel Team (ue)" },
+	  { word: "fruit", phonetic: "fruːt", type: "Vowel Team (ui)" },
+	  { word: "moon", phonetic: "muːn", type: "Vowel Team (oo)" },
+
+	  { word: "autumn", phonetic: "ˈɔːtəm", type: "Vowel Team (au)" },
+	  { word: "saw", phonetic: "sɔː", type: "Vowel Team (aw)" },
+
+	  { word: "cloud", phonetic: "klaʊd", type: "Vowel Team (ou)" },
+	  { word: "cow", phonetic: "kaʊ", type: "Vowel Team (ow)" },
+
+	  { word: "coin", phonetic: "kɔɪn", type: "Vowel Team (oi)" },
+	  { word: "boy", phonetic: "bɔɪ", type: "Vowel Team (oy)" },
+	  
+	  { word: "car", phonetic: "kɑr", type: "R-controlled (ar)" },
+	  { word: "tiger", phonetic: "ˈtaɪɡər", type: "R-controlled (er)" },
+	  { word: "bird", phonetic: "bɜrd", type: "R-controlled (ir)" },
+	  { word: "corn", phonetic: "kɔrn", type: "R-controlled (or)" },
+	  { word: "turtle", phonetic: "ˈtɜrtl", type: "R-controlled (ur)" },
+	  
+	  
+	  
+	];
+    const card = document.getElementById("card");
+    const front = document.getElementById("front");
+    const back = document.getElementById("back");
+    const typeInfo = document.getElementById("typeInfo");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    let index = 0;
+
+    function flip() {
+      card.classList.toggle("is-flipped");
+    }
+    card.addEventListener("click", flip);
+
+    function loadCard(i) {
+      card.classList.remove("is-flipped");
+      const item = dictionary[i];
+      front.textContent = item.word;
+      back.textContent = item.phonetic;
+      typeInfo.textContent = "母音類型: " + item.type;
+    }
+
+    prevBtn.addEventListener("click", () => {
+      index = (index - 1 + dictionary.length) % dictionary.length;
+      loadCard(index);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      index = (index + 1) % dictionary.length;
+      loadCard(index);
+    });
+
+    // 初始化
+    loadCard(index);
+  </script>
+</body>
+</html>
