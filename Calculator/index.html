@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>80年代街機計算機 - RETRO CALC</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="arcade-cabinet">
+    <div class="cabinet-top">
+      <div class="neon-sign">
+        <span class="flicker">R</span>ETRO 
+        <span class="flicker-slow">C</span>ALC
+      </div>
+    </div>
+    
+    <div class="screen-bezel">
+      <div class="crt-screen">
+        <div class="scanlines"></div>
+        <div class="display-container">
+          <div class="game-info">
+            <span class="score-label">SCORE:</span>
+            <span id="calculation-count" class="score">000</span>
+          </div>
+          <div id="display" class="display" role="region" aria-live="polite" aria-label="計算結果顯示">0</div>
+          <div class="display-hint" aria-hidden="true">▼ PRESS SPACE ▼</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-panel">
+      <div class="quick-calc-panel" role="group" aria-label="快捷計算功能">
+        <div class="panel-title">▼ SPECIAL MOVES ▼</div>
+        <button class="btn-quick" data-quick="yield" aria-label="殖利率計算">
+          <span class="quick-icon">💰</span>
+          <span class="quick-label">殖利率</span>
+        </button>
+        <button class="btn-quick" data-quick="pe-ratio" aria-label="本益比計算">
+          <span class="quick-icon">📊</span>
+          <span class="quick-label">本益比</span>
+        </button>
+        <button class="btn-quick" data-quick="compound" aria-label="複利計算">
+          <span class="quick-icon">📈</span>
+          <span class="quick-label">複利</span>
+        </button>
+        <button class="btn-quick" data-quick="change-rate" aria-label="漲跌幅計算">
+          <span class="quick-icon">🔄</span>
+          <span class="quick-label">漲跌幅</span>
+        </button>
+      </div>
+
+      <div class="button-grid" role="group" aria-label="計算機按鍵">
+        <button class="btn btn-function" data-action="clear" aria-label="清除">AC</button>
+        <button class="btn btn-function" data-action="delete" aria-label="刪除">DEL</button>
+        <button class="btn btn-function" data-action="percent" aria-label="百分比">%</button>
+        <button class="btn btn-operator" data-action="divide" aria-label="除">÷</button>
+
+        <button class="btn btn-number" data-value="7">7</button>
+        <button class="btn btn-number" data-value="8">8</button>
+        <button class="btn btn-number" data-value="9">9</button>
+        <button class="btn btn-operator" data-action="multiply" aria-label="乘">×</button>
+
+        <button class="btn btn-number" data-value="4">4</button>
+        <button class="btn btn-number" data-value="5">5</button>
+        <button class="btn btn-number" data-value="6">6</button>
+        <button class="btn btn-operator" data-action="subtract" aria-label="減">−</button>
+
+        <button class="btn btn-number" data-value="1">1</button>
+        <button class="btn btn-number" data-value="2">2</button>
+        <button class="btn btn-number" data-value="3">3</button>
+        <button class="btn btn-operator" data-action="add" aria-label="加">+</button>
+
+        <button class="btn btn-number btn-zero" data-value="0">0</button>
+        <button class="btn btn-number" data-value="." aria-label="小數點">.</button>
+        <button class="btn btn-equals" data-action="equals" aria-label="等於">=</button>
+      </div>
+    </div>
+
+    <div class="cabinet-bottom">
+      <div class="coin-slot">
+        <div class="slot-label">INSERT COIN</div>
+        <div class="slot"></div>
+      </div>
+      <div class="speaker-grill">
+        <div class="grill-line"></div>
+        <div class="grill-line"></div>
+        <div class="grill-line"></div>
+        <div class="grill-line"></div>
+        <div class="grill-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-credits">
+    <p>© 1985 RETRO CALC - PRESS ANY KEY TO CONTINUE</p>
+  </div>
+
+  <script src="calculator.js"></script>
+</body>
+</html>
