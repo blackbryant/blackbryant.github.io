@@ -169,6 +169,10 @@ function createDisplayManager(displayElement, scoreElement) {
 function createSoundManager() {
   let audioContext = null;
   let isEnabled = true;
+  let lastPlayTime = 0;
+  const MIN_INTERVAL = 20; // 最小播放間隔（毫秒）
+  let activeOscillators = new Set(); // 追蹤活躍的振盪器
+  const MAX_CONCURRENT_SOUNDS = 5; // 最大同時音效數
 
   function getAudioContext() {
     if (!audioContext) {
@@ -180,6 +184,18 @@ function createSoundManager() {
   return {
     playBeep(frequency = 440, duration = 50) {
       if (!isEnabled) return;
+
+      // Throttling: 防止過於頻繁的音效播放
+      const now = Date.now();
+      if (now - lastPlayTime < MIN_INTERVAL) {
+        return;
+      }
+      lastPlayTime = now;
+
+      // 限制同時播放的音效數量
+      if (activeOscillators.size >= MAX_CONCURRENT_SOUNDS) {
+        return;
+      }
 
       try {
         const ctx = getAudioContext();
@@ -195,8 +211,16 @@ function createSoundManager() {
         gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
 
+        // 追蹤振盪器
+        activeOscillators.add(oscillator);
+
         oscillator.start(ctx.currentTime);
         oscillator.stop(ctx.currentTime + duration / 1000);
+
+        // 清理已停止的振盪器
+        oscillator.onended = () => {
+          activeOscillators.delete(oscillator);
+        };
       } catch (error) {
         console.warn('Sound playback failed:', error);
       }
@@ -225,6 +249,24 @@ function createSoundManager() {
 
     isEnabled() {
       return isEnabled;
+    },
+
+    cleanup() {
+      // 清理所有活躍的振盪器
+      activeOscillators.forEach(osc => {
+        try {
+          osc.stop();
+          osc.disconnect();
+        } catch (e) {
+          // 忽略已經停止的振盪器
+        }
+      });
+      activeOscillators.clear();
+      
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
     }
   };
 }
@@ -351,6 +393,7 @@ function createInputDialogManager(sound) {
           input.placeholder = field.placeholder || '';
           input.inputMode = 'decimal'; // 行動裝置顯示數字鍵盤
           input.autocomplete = 'off';
+          input.setAttribute('maxlength', '15'); // 限制輸入長度
           
           // 只允許數字、小數點、負號
           input.addEventListener('keydown', (e) => {
@@ -366,13 +409,27 @@ function createInputDialogManager(sound) {
             }
           });
           
-          // 貼上時驗證
+          // 貼上時驗證（更嚴格）
           input.addEventListener('paste', (e) => {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            const validNumber = pastedText.match(/^-?\d*\.?\d*$/);
+            // 限制長度和格式
+            const validNumber = pastedText.match(/^-?\d{1,15}(\.\d{1,10})?$/);
             if (validNumber) {
-              input.value = pastedText;
+              const num = parseFloat(pastedText);
+              // 防止極端數值
+              if (Math.abs(num) <= Number.MAX_SAFE_INTEGER) {
+                input.value = pastedText;
+              }
+            }
+          });
+          
+          // 失焦時驗證數值範圍
+          input.addEventListener('blur', (e) => {
+            const num = parseFloat(input.value);
+            if (!isNaN(num) && Math.abs(num) > Number.MAX_SAFE_INTEGER) {
+              input.value = '';
+              input.placeholder = '數值過大，請重新輸入';
             }
           });
           
@@ -762,6 +819,22 @@ function initCalculator() {
   displayManager.updateScore(0);
 
   console.log('🎮 RETRO CALC initialized - Ready Player One!');
+  
+  // 頁面卸載時清理資源
+  window.addEventListener('beforeunload', () => {
+    keyboardController.detach();
+    if (soundManager.cleanup) {
+      soundManager.cleanup();
+    }
+  });
+  
+  // 提供清理方法供外部調用
+  window.calculatorCleanup = () => {
+    keyboardController.detach();
+    if (soundManager.cleanup) {
+      soundManager.cleanup();
+    }
+  };
 }
 
 // 當 DOM 載入完成後初始化
