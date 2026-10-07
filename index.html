@@ -1,227 +1,623 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WebMyWidgets</title>
+  <title>教育小工具平台</title>
 
   <!-- Bootstrap Icons CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    header {
-      text-align: center;
-      padding: 20px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 2rem;
-      border-radius: 8px;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 0 20px;
     }
 
-    .search-container {
+    /* Header/Hero Section */
+    header {
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+      color: white;
+      padding: 60px 20px 40px;
       text-align: center;
-      margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      margin-bottom: 20px;
+    }
+
+    /* Search Section */
+    .search-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 30px 0;
+      flex-wrap: wrap;
     }
 
     .search-container input {
-      padding: 10px;
+      padding: 12px 20px;
       width: 300px;
       font-size: 1rem;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      margin-right: 10px;
+      border: 2px solid #E0E7FF;
+      border-radius: 8px;
+      background-color: white;
+      transition: border-color 0.3s;
+    }
+
+    .search-container input:focus {
+      outline: none;
+      border-color: #4A90E2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     }
 
     .search-container button {
-      padding: 10px 20px;
+      padding: 12px 30px;
       font-size: 1rem;
-      background-color: #4CAF50;
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .search-container button:hover {
-      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
     }
 
-    .link-list {
+    .search-container button:active {
+      transform: translateY(0);
+    }
+
+    /* Category Section */
+    .category-section {
+      margin-bottom: 50px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      border-bottom: 3px solid #7ED321;
+      padding-bottom: 15px;
+    }
+
+    .category-icon {
+      font-size: 2rem;
+      color: #7ED321;
+    }
+
+    .category-header h2 {
+      font-size: 1.8rem;
+      color: #357ABD;
+      margin: 0;
+    }
+
+    .category-header p {
+      font-size: 0.95rem;
+      color: #666;
+      margin: 0;
+      margin-left: auto;
+      font-style: italic;
+    }
+
+    /* Tool Grid */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .tool-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+      border-left: 5px solid #4A90E2;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
-      margin-top: 20px;
+      height: 100%;
     }
 
-    .link-item {
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin: 10px;
-      text-align: left;
-      border-radius: 8px;
-      transition: transform 0.3s;
+    .tool-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      background-color: #f8fbff;
+    }
+
+    .tool-header {
       display: flex;
       align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
-    .link-item:hover {
-      transform: scale(1.03);
+    .tool-icon {
+      font-size: 1.8rem;
+      color: #7ED321;
+      min-width: 40px;
+      text-align: center;
     }
 
-    .link-item a {
-      text-decoration: none;
-      color: #333;
+    .tool-title {
       font-size: 1.2rem;
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
+      font-weight: 600;
+      color: #357ABD;
+      margin: 0;
     }
 
-    .link-icon {
-      font-size: 1.4rem;
-      color: #4CAF50;
+    .tool-description {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+      flex-grow: 1;
     }
 
+    .tool-link {
+      display: inline-block;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #7ED321 0%, #5db300 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-align: center;
+    }
+
+    .tool-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(126, 211, 33, 0.3);
+    }
+
+    .tool-link:active {
+      transform: translateY(0);
+    }
+
+    /* Expandable/Placeholder Section */
+    .placeholder-section {
+      background: white;
+      border: 2px dashed #CCC;
+      border-radius: 12px;
+      padding: 40px 25px;
+      text-align: center;
+      color: #999;
+    }
+
+    .placeholder-icon {
+      font-size: 3rem;
+      color: #DDD;
+      margin-bottom: 15px;
+    }
+
+    .placeholder-section h3 {
+      font-size: 1.3rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .placeholder-section p {
+      color: #999;
+      margin: 0;
+    }
+
+    /* Pagination */
     .pagination {
       display: flex;
       justify-content: center;
-      margin-top: 20px;
+      gap: 10px;
+      margin: 30px 0;
+      flex-wrap: wrap;
     }
 
     .pagination button {
       padding: 10px 20px;
       font-size: 1rem;
-      border: 1px solid #ddd;
-      background-color: #fff;
+      border: 2px solid #E0E7FF;
+      background-color: white;
+      color: #4A90E2;
       cursor: pointer;
-      margin: 0 5px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s;
     }
 
-    .pagination button:hover {
-      background-color: #4CAF50;
+    .pagination button:hover:not(:disabled) {
+      background-color: #4A90E2;
       color: white;
+      transform: translateY(-2px);
     }
 
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
     footer {
       text-align: center;
-      margin-top: 40px;
+      padding: 30px 20px;
       color: #888;
+      margin-top: 50px;
+      border-top: 1px solid #E0E7FF;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
+      .search-container input {
+        width: 100%;
+        min-width: 250px;
+      }
+
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .category-header p {
+        margin-left: 0;
+        margin-top: 10px;
+      }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      color: #DDD;
+      margin-bottom: 15px;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
 
   <header>
-    WebMyWidgets - 工具大集合
+    <div class="container">
+      <h1>🎓 教育小工具平台</h1>
+      <p>探索有趣的學習工具，助力你的學習之旅</p>
+    </div>
   </header>
 
-  <div class="container">
+  <main class="container">
+    <!-- Search Section -->
     <div class="search-container">
-      <input type="text" id="searchInput" placeholder="搜尋連結..." />
-      <button onclick="searchLinks()">搜尋</button>
+      <input type="text" id="searchInput" placeholder="搜尋工具名稱..." />
+      <button onclick="searchTools()">搜尋</button>
     </div>
 
-    <div id="linkList" class="link-list">
-      <!-- 動態生成連結 -->
+    <!-- Categories Container -->
+    <div id="categoriesContainer">
+      <!-- 動態生成類別內容 -->
     </div>
 
-    <div class="pagination">
-      <button id="prevBtn" onclick="changePage(-1)">上一頁</button>
-      <button id="nextBtn" onclick="changePage(1)">下一頁</button>
+    <!-- Pagination -->
+    <div class="pagination" id="paginationContainer" style="display: none;">
+      <button id="prevBtn" onclick="changePage(-1)">← 上一頁</button>
+      <button id="pageInfo" disabled style="background-color: #f0f0f0; color: #333; cursor: default;">第 1 頁</button>
+      <button id="nextBtn" onclick="changePage(1)">下一頁 →</button>
     </div>
-  </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">🔍</div>
+      <p>未找到符合條件的工具，請嘗試其他搜尋條件</p>
+    </div>
+  </main>
 
   <footer>
-    &copy; 2025 WebMyWidgets. All rights reserved.
+    <p>&copy; 2025 教育小工具平台</p>
+    <p>持續學習，探索無限可能</p>
   </footer>
 
   <script>
-    const allLinks = [
-      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5" },
-      { text: "計數器", url: "計數器.html", icon: "bi-journal-code" },
-      { text: "錄音(測試中)", url: "錄音.html", icon: "bi-journal-code" },
-      { text: "動詞三態測驗", url: "TestVerbs.html", icon: "bi-chat-dots" },
-      { text: "Cron 產生器", url: "CronExpression.html", icon: "bi-clock" },
-      { text: "Json檢視器", url: "JsonViewer.html", icon: "bi-code-slash" },
-      { text: "簡單todo管理", url: "/todolist/trello_style_task_board.html", icon: "bi-bug" },
-      { text: "自然發音", url: "Phonics.html", icon: "bi-bar-chart" },
-      { text: "計算機", url: "Calculator/index.html", icon: "bi-book" },
-      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square" }
-    ];
+    // 工具數據定義
+    const tools = {
+      'AI小工具': [
+        { 
+          text: "計數器", 
+          url: "計數器.html", 
+          icon: "bi-calculator", 
+          description: "簡單易用的計數工具，幫助統計數據" 
+        },
+        { 
+          text: "動詞三態測驗", 
+          url: "TestVerbs.html", 
+          icon: "bi-book", 
+          description: "英語動詞三態練習與測驗系統" 
+        },
+        { 
+          text: "自然發音", 
+          url: "Phonics.html", 
+          icon: "bi-mic", 
+          description: "學習英文自然發音規則和技巧" 
+        },
+        { 
+          text: "錄音工具", 
+          url: "錄音.html", 
+          icon: "bi-mic-fill", 
+          description: "簡單的線上錄音工具（測試版）" 
+        },
+        { 
+          text: "Cron產生器", 
+          url: "CronExpression.html", 
+          icon: "bi-clock", 
+          description: "生成和理解Cron表達式" 
+        },
+        { 
+          text: "JSON檢視器", 
+          url: "JsonViewer.html", 
+          icon: "bi-code-slash", 
+          description: "格式化和檢視JSON數據" 
+        },
+        { 
+          text: "計算機", 
+          url: "Calculator/index.html", 
+          icon: "bi-calculator-fill", 
+          description: "功能完整的計算機工具" 
+        },
+        { 
+          text: "任務管理", 
+          url: "todolist/trello_style_task_board.html", 
+          icon: "bi-check-square", 
+          description: "簡單實用的待辦事項管理系統" 
+        },
+        { 
+          text: "抽籤小程式", 
+          url: "抽籤.html", 
+          icon: "bi-shuffle", 
+          description: "隨機抽籤工具，適合課堂抽籤" 
+        }
+      ],
+      'M5Stack': [
+        { 
+          text: "即將推出", 
+          url: "#", 
+          icon: "bi-cpu", 
+          description: "M5Stack相關教學和工具正在準備中，敬請期待..." 
+        }
+      ]
+    };
 
-    const itemsPerPage = 10;
     let currentPage = 1;
+    const itemsPerPage = 10;
+    let currentCategory = null;
+    let filteredTools = [];
 
-    function displayLinks(links) {
-      const linkListDiv = document.getElementById('linkList');
-      linkListDiv.innerHTML = '';
+    // 初始化
+    function init() {
+      displayAllCategories();
+    }
 
-      links.forEach(link => {
-        const linkDiv = document.createElement('div');
-        linkDiv.className = 'link-item';
-        linkDiv.innerHTML = `
-          <i class="link-icon bi ${link.icon}"></i>
-          <a href="${link.url}" target="_blank">${link.text}</a>
+    // 顯示所有類別
+    function displayAllCategories() {
+      const container = document.getElementById('categoriesContainer');
+      container.innerHTML = '';
+      let toolCount = 0;
+
+      for (const [category, categoryTools] of Object.entries(tools)) {
+        const hasTools = categoryTools.length > 0;
+        
+        const categorySection = document.createElement('div');
+        categorySection.className = 'category-section';
+        
+        let categoryHeaderHTML = `
+          <div class="category-header">
+            <i class="category-icon bi ${category === 'AI小工具' ? 'bi-lightbulb' : 'bi-cpu'}"></i>
+            <h2>${category}</h2>
         `;
-        linkListDiv.appendChild(linkDiv);
-      });
+
+        if (category === 'M5Stack') {
+          categoryHeaderHTML += `<p>敬請期待更多內容</p>`;
+        }
+        
+        categoryHeaderHTML += '</div>';
+
+        categorySection.innerHTML = categoryHeaderHTML;
+
+        if (category === 'AI小工具') {
+          const gridDiv = document.createElement('div');
+          gridDiv.className = 'tool-grid';
+          
+          categoryTools.forEach(tool => {
+            if (tool.url !== '#') {
+              gridDiv.appendChild(createToolCard(tool));
+              toolCount++;
+            }
+          });
+          
+          categorySection.appendChild(gridDiv);
+        } else {
+          // M5Stack placeholder
+          const gridDiv = document.createElement('div');
+          gridDiv.className = 'tool-grid';
+          const placeholderDiv = document.createElement('div');
+          placeholderDiv.className = 'placeholder-section';
+          placeholderDiv.innerHTML = `
+            <div class="placeholder-icon">📚</div>
+            <h3>M5Stack教學</h3>
+            <p>M5Stack相關的硬體教學和專案示例即將上線，敬請期待！</p>
+          `;
+          gridDiv.appendChild(placeholderDiv);
+          categorySection.appendChild(gridDiv);
+        }
+
+        container.appendChild(categorySection);
+      }
+
+      document.getElementById('paginationContainer').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'none';
     }
 
-    function getPageLinks(page) {
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      return allLinks.slice(startIndex, endIndex);
+    // 創建工具卡片
+    function createToolCard(tool) {
+      const card = document.createElement('div');
+      card.className = 'tool-card';
+      card.innerHTML = `
+        <div class="tool-header">
+          <i class="tool-icon bi ${tool.icon}"></i>
+          <h3 class="tool-title">${tool.text}</h3>
+        </div>
+        <p class="tool-description">${tool.description}</p>
+        <a href="${tool.url}" class="tool-link">進入工具 →</a>
+      `;
+      return card;
     }
 
-    function searchLinks() {
+    // 搜尋工具
+    function searchTools() {
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
-        link.text.toLowerCase().includes(searchQuery)
-      );
-      displayLinks(filteredLinks.slice(0, itemsPerPage));
+      
+      if (!searchQuery.trim()) {
+        displayAllCategories();
+        return;
+      }
+
+      // 搜尋所有類別的工具
+      filteredTools = [];
+      for (const [category, categoryTools] of Object.entries(tools)) {
+        const matched = categoryTools.filter(tool =>
+          tool.text.toLowerCase().includes(searchQuery) ||
+          tool.description.toLowerCase().includes(searchQuery)
+        );
+        filteredTools.push(...matched);
+      }
+
+      if (filteredTools.length === 0) {
+        document.getElementById('categoriesContainer').innerHTML = '';
+        document.getElementById('paginationContainer').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      }
+
       currentPage = 1;
-      updatePagination(filteredLinks.length);
+      displaySearchResults();
     }
 
-    function updatePagination(filteredLinksCount) {
-      const totalPages = Math.ceil(filteredLinksCount / itemsPerPage);
+    // 顯示搜尋結果
+    function displaySearchResults() {
+      const container = document.getElementById('categoriesContainer');
+      container.innerHTML = '';
+      document.getElementById('emptyState').style.display = 'none';
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageTools = filteredTools.slice(startIndex, endIndex);
+
+      if (pageTools.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('paginationContainer').style.display = 'none';
+        return;
+      }
+
+      const section = document.createElement('div');
+      section.className = 'category-section';
+      section.innerHTML = '<div class="category-header"><h2>搜尋結果</h2></div>';
+
+      const gridDiv = document.createElement('div');
+      gridDiv.className = 'tool-grid';
+
+      pageTools.forEach(tool => {
+        gridDiv.appendChild(createToolCard(tool));
+      });
+
+      section.appendChild(gridDiv);
+      container.appendChild(section);
+
+      // 更新分頁
+      const totalPages = Math.ceil(filteredTools.length / itemsPerPage);
+      document.getElementById('paginationContainer').style.display = 'flex';
+      document.getElementById('pageInfo').textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
       document.getElementById('prevBtn').disabled = currentPage === 1;
       document.getElementById('nextBtn').disabled = currentPage >= totalPages;
     }
 
+    // 改變頁碼
     function changePage(direction) {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
-        link.text.toLowerCase().includes(searchQuery)
-      );
-
-      const totalPages = Math.ceil(filteredLinks.length / itemsPerPage);
       currentPage += direction;
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPages) currentPage = totalPages;
-
-      const pageLinks = filteredLinks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-      displayLinks(pageLinks);
-      updatePagination(filteredLinks.length);
+      displaySearchResults();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    window.onload = function () {
-      displayLinks(getPageLinks(currentPage));
-      updatePagination(allLinks.length);
-    };
+    // 初始化應用
+    window.addEventListener('load', init);
+
+    // 回車鍵搜尋
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          searchTools();
+        }
+      });
+    });
   </script>
 
 </body>
