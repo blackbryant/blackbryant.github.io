@@ -362,7 +362,7 @@
     <!-- Pagination -->
     <div class="pagination" id="paginationContainer" style="display: none;">
       <button id="prevBtn" onclick="changePage(-1)">← 上一頁</button>
-      <button id="pageInfo" disabled style="background-color: #f0f0f0; color: #333; cursor: default;">第 1 頁</button>
+      <span id="pageInfo" style="background-color: #f0f0f0; color: #333; padding: 10px 20px; border-radius: 6px; border: 2px solid #E0E7FF;">第 1 頁</span>
       <button id="nextBtn" onclick="changePage(1)">下一頁 →</button>
     </div>
 
@@ -442,14 +442,19 @@
           text: "即將推出", 
           url: "#", 
           icon: "bi-cpu", 
-          description: "M5Stack相關教學和工具正在準備中，敬請期待..." 
+          description: "M5Stack相關教學和工具正在準備中，敬請期待...",
+          isPlaceholder: true
         }
       ]
     };
 
+    const categoryMetadata = {
+      'AI小工具': { icon: 'bi-lightbulb' },
+      'M5Stack': { icon: 'bi-cpu' }
+    };
+
     let currentPage = 1;
     const itemsPerPage = 10;
-    let currentCategory = null;
     let filteredTools = [];
 
     // 初始化
@@ -461,55 +466,69 @@
     function displayAllCategories() {
       const container = document.getElementById('categoriesContainer');
       container.innerHTML = '';
-      let toolCount = 0;
+      filteredTools = []; // Reset filtered tools when displaying all categories
 
       for (const [category, categoryTools] of Object.entries(tools)) {
-        const hasTools = categoryTools.length > 0;
+        const metadata = categoryMetadata[category];
         
         const categorySection = document.createElement('div');
         categorySection.className = 'category-section';
         
-        let categoryHeaderHTML = `
-          <div class="category-header">
-            <i class="category-icon bi ${category === 'AI小工具' ? 'bi-lightbulb' : 'bi-cpu'}"></i>
-            <h2>${category}</h2>
-        `;
-
-        if (category === 'M5Stack') {
-          categoryHeaderHTML += `<p>敬請期待更多內容</p>`;
-        }
+        const categoryHeader = document.createElement('div');
+        categoryHeader.className = 'category-header';
         
-        categoryHeaderHTML += '</div>';
+        const iconSpan = document.createElement('i');
+        iconSpan.className = `category-icon bi ${metadata.icon}`;
+        
+        const titleH2 = document.createElement('h2');
+        titleH2.textContent = category;
+        
+        categoryHeader.appendChild(iconSpan);
+        categoryHeader.appendChild(titleH2);
+        
+        // Check if this category has placeholder tools
+        const hasPlaceholders = categoryTools.some(tool => tool.isPlaceholder);
+        if (hasPlaceholders) {
+          const noteP = document.createElement('p');
+          noteP.textContent = '敬請期待更多內容';
+          categoryHeader.appendChild(noteP);
+        }
 
-        categorySection.innerHTML = categoryHeaderHTML;
+        categorySection.appendChild(categoryHeader);
 
-        if (category === 'AI小工具') {
-          const gridDiv = document.createElement('div');
-          gridDiv.className = 'tool-grid';
-          
-          categoryTools.forEach(tool => {
-            if (tool.url !== '#') {
-              gridDiv.appendChild(createToolCard(tool));
-              toolCount++;
-            }
-          });
-          
-          categorySection.appendChild(gridDiv);
-        } else {
-          // M5Stack placeholder
-          const gridDiv = document.createElement('div');
-          gridDiv.className = 'tool-grid';
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'tool-grid';
+
+        // Render placeholder tools
+        const placeholderTools = categoryTools.filter(tool => tool.isPlaceholder);
+        const realTools = categoryTools.filter(tool => !tool.isPlaceholder);
+        
+        placeholderTools.forEach(placeholderTool => {
           const placeholderDiv = document.createElement('div');
           placeholderDiv.className = 'placeholder-section';
-          placeholderDiv.innerHTML = `
-            <div class="placeholder-icon">📚</div>
-            <h3>M5Stack教學</h3>
-            <p>M5Stack相關的硬體教學和專案示例即將上線，敬請期待！</p>
-          `;
+          
+          const iconDiv = document.createElement('div');
+          iconDiv.className = 'placeholder-icon';
+          iconDiv.textContent = '📚';
+          
+          const h3 = document.createElement('h3');
+          h3.textContent = placeholderTool.text;
+          
+          const p = document.createElement('p');
+          p.textContent = placeholderTool.description;
+          
+          placeholderDiv.appendChild(iconDiv);
+          placeholderDiv.appendChild(h3);
+          placeholderDiv.appendChild(p);
           gridDiv.appendChild(placeholderDiv);
-          categorySection.appendChild(gridDiv);
-        }
-
+        });
+        
+        // Render real tools
+        realTools.forEach(tool => {
+          gridDiv.appendChild(createToolCard(tool));
+        });
+        
+        categorySection.appendChild(gridDiv);
         container.appendChild(categorySection);
       }
 
@@ -521,22 +540,43 @@
     function createToolCard(tool) {
       const card = document.createElement('div');
       card.className = 'tool-card';
-      card.innerHTML = `
-        <div class="tool-header">
-          <i class="tool-icon bi ${tool.icon}"></i>
-          <h3 class="tool-title">${tool.text}</h3>
-        </div>
-        <p class="tool-description">${tool.description}</p>
-        <a href="${tool.url}" class="tool-link">進入工具 →</a>
-      `;
+      
+      const header = document.createElement('div');
+      header.className = 'tool-header';
+      
+      const icon = document.createElement('i');
+      icon.className = `tool-icon bi ${tool.icon}`;
+      
+      const title = document.createElement('h3');
+      title.className = 'tool-title';
+      title.textContent = tool.text;
+      
+      header.appendChild(icon);
+      header.appendChild(title);
+      
+      const description = document.createElement('p');
+      description.className = 'tool-description';
+      description.textContent = tool.description;
+      
+      const link = document.createElement('a');
+      link.className = 'tool-link';
+      link.href = tool.url;
+      link.textContent = '進入工具 →';
+      link.target = '_blank';
+      link.setAttribute('aria-label', `進入工具：${tool.text}`);
+      
+      card.appendChild(header);
+      card.appendChild(description);
+      card.appendChild(link);
+      
       return card;
     }
 
     // 搜尋工具
     function searchTools() {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
       
-      if (!searchQuery.trim()) {
+      if (!searchQuery) {
         displayAllCategories();
         return;
       }
@@ -545,8 +585,10 @@
       filteredTools = [];
       for (const [category, categoryTools] of Object.entries(tools)) {
         const matched = categoryTools.filter(tool =>
-          tool.text.toLowerCase().includes(searchQuery) ||
-          tool.description.toLowerCase().includes(searchQuery)
+          !tool.isPlaceholder && (
+            tool.text.toLowerCase().includes(searchQuery) ||
+            tool.description.toLowerCase().includes(searchQuery)
+          )
         );
         filteredTools.push(...matched);
       }
@@ -580,7 +622,15 @@
 
       const section = document.createElement('div');
       section.className = 'category-section';
-      section.innerHTML = '<div class="category-header"><h2>搜尋結果</h2></div>';
+      
+      const categoryHeader = document.createElement('div');
+      categoryHeader.className = 'category-header';
+      
+      const h2 = document.createElement('h2');
+      h2.textContent = '搜尋結果';
+      
+      categoryHeader.appendChild(h2);
+      section.appendChild(categoryHeader);
 
       const gridDiv = document.createElement('div');
       gridDiv.className = 'tool-grid';
@@ -602,16 +652,26 @@
 
     // 改變頁碼
     function changePage(direction) {
+      // Guard against pagination when not in search mode
+      if (filteredTools.length === 0) {
+        return;
+      }
+      
+      const totalPages = Math.max(1, Math.ceil(filteredTools.length / itemsPerPage));
       currentPage += direction;
+      
+      // 邊界檢查
+      currentPage = Math.max(1, Math.min(currentPage, totalPages));
+      
       displaySearchResults();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // 初始化應用
-    window.addEventListener('load', init);
-
-    // 回車鍵搜尋
-    document.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('DOMContentLoaded', function() {
+      init();
+      
+      // 回車鍵搜尋
       document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           searchTools();
