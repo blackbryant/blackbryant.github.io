@@ -127,7 +127,7 @@
                     
                     // 綁定點擊事件：渲染文章內容
                     listItem.addEventListener('click', () => {
-                        renderArticle(item.content, listItem);
+                        renderArticle(item.file, listItem);
                     });
                     
                     list.appendChild(listItem);
@@ -138,23 +138,41 @@
         }
 
         // 3. 渲染 Markdown 內容至右側區塊
-        function renderArticle(markdownText, clickedElement) {
-            // 更新選單的 Active 狀態 (高亮目前選取的項目)
-            if (activeMenuItem) {
-                activeMenuItem.classList.remove('active');
-            }
-            clickedElement.classList.add('active');
-            activeMenuItem = clickedElement;
-
-            // 將 Markdown 轉為 HTML 並放入右側容器
-            articleContent.innerHTML = marked.parse(markdownText);
-            
-            // 呼叫 Prism.js 重新掃描並加上程式碼顏色
-            Prism.highlightAll();
-            
-            // 將右側卷軸滾動回頂部
-            document.querySelector('.main-content').scrollTop = 0;
-        }
+		async function renderArticle(filePath, clickedElement) {
+		    // 【防呆 1】檢查有沒有傳入路徑
+		    if (!filePath) {
+		        articleContent.innerHTML = '<div class="placeholder" style="color: red;">❌ 錯誤：找不到檔案路徑，請檢查 articleData 是否有設定 file 屬性。</div>';
+		        console.error("renderArticle 收到 undefined 的 filePath");
+		        return;
+		    }
+		
+		    if (activeMenuItem) activeMenuItem.classList.remove('active');
+		    clickedElement.classList.add('active');
+		    activeMenuItem = clickedElement;
+		
+		    articleContent.innerHTML = '<div class="placeholder">⏳ 文章載入中...</div>';
+		
+		    try {
+		        const response = await fetch(filePath);
+		        if (!response.ok) throw new Error(`HTTP 錯誤狀態碼: ${response.status}`);
+		        
+		        const markdownText = await response.text();
+		
+		        // 【防呆 2】確保轉出來的文字不是空的或 null
+		        if (!markdownText) {
+		            throw new Error("檔案內容為空");
+		        }
+		
+		        // 這裡確保傳給 marked.parse 的一定是字串
+		        articleContent.innerHTML = marked.parse(markdownText);
+		        Prism.highlightAll();
+		        document.querySelector('.main-content').scrollTop = 0;
+		
+		    } catch (error) {
+		        articleContent.innerHTML = `<div class="placeholder" style="color: red;">❌ 讀取失敗：<br>${error.message}</div>`;
+		        console.error("載入文章時發生錯誤:", error);
+		    }
+		}
 
         // 啟動應用：初始化選單
         renderMenu();
