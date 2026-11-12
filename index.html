@@ -59,6 +59,29 @@
       background-color: #45a049;
     }
 
+    .category-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .category-tabs button {
+      padding: 10px 18px;
+      font-size: 1rem;
+      border: 1px solid #4CAF50;
+      background-color: #fff;
+      color: #4CAF50;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .category-tabs button.active {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+
     .link-list {
       display: flex;
       flex-direction: column;
@@ -134,6 +157,11 @@
       <button onclick="searchLinks()">搜尋</button>
     </div>
 
+    <div class="category-tabs">
+      <button id="tabWebMyWidgets" class="active" onclick="switchCategory('WebMyWidgets')">WebMyWidgets</button>
+      <button id="tabTech" onclick="switchCategory('常用技術')">常用技術</button>
+    </div>
+
     <div id="linkList" class="link-list">
       <!-- 動態生成連結 -->
     </div>
@@ -150,20 +178,21 @@
 
   <script>
     const allLinks = [
-      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5" },
-      { text: "計數器", url: "計數器.html", icon: "bi-journal-code" },
-      { text: "錄音(測試中)", url: "錄音.html", icon: "bi-journal-code" },
-      { text: "動詞三態測驗", url: "TestVerbs.html", icon: "bi-chat-dots" },
-      { text: "Cron 產生器", url: "CronExpression.html", icon: "bi-clock" },
-      { text: "Json檢視器", url: "JsonViewer.html", icon: "bi-code-slash" },
-      { text: "簡單todo管理", url: "/todolist/trello_style_task_board.html", icon: "bi-bug" },
-      { text: "自然發音", url: "Phonics.html", icon: "bi-bar-chart" },
-      { text: "計算機", url: "Calculator/index.html", icon: "bi-book" },
-      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square" }
+      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5", category: "WebMyWidgets" },
+      { text: "計數器", url: "計數器.html", icon: "bi-journal-code", category: "WebMyWidgets" },
+      { text: "錄音(測試中)", url: "錄音.html", icon: "bi-journal-code", category: "WebMyWidgets" },
+      { text: "動詞三態測驗", url: "TestVerbs.html", icon: "bi-chat-dots", category: "WebMyWidgets" },
+      { text: "Cron 產生器", url: "CronExpression.html", icon: "bi-clock", category: "WebMyWidgets" },
+      { text: "Json檢視器", url: "JsonViewer.html", icon: "bi-code-slash", category: "WebMyWidgets" },
+      { text: "簡單todo管理", url: "/todolist/trello_style_task_board.html", icon: "bi-bug", category: "WebMyWidgets" },
+      { text: "自然發音", url: "Phonics.html", icon: "bi-bar-chart", category: "WebMyWidgets" },
+      { text: "計算機", url: "Calculator/index.html", icon: "bi-book", category: "WebMyWidgets" },
+      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square", category: "常用技術" }
     ];
 
     const itemsPerPage = 10;
     let currentPage = 1;
+    let currentCategory = "WebMyWidgets";
 
     function displayLinks(links) {
       const linkListDiv = document.getElementById('linkList');
@@ -180,47 +209,60 @@
       });
     }
 
-    function getPageLinks(page) {
+    function getPageLinks(links, page) {
       const startIndex = (page - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
-      return allLinks.slice(startIndex, endIndex);
+      return links.slice(startIndex, endIndex);
     }
 
-    function searchLinks() {
+    function getFilteredLinks() {
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
+      return allLinks.filter(link =>
+        link.category === currentCategory &&
         link.text.toLowerCase().includes(searchQuery)
       );
-      displayLinks(filteredLinks.slice(0, itemsPerPage));
-      currentPage = 1;
+    }
+
+    function renderCurrentPage() {
+      const filteredLinks = getFilteredLinks();
+      const totalPages = Math.max(1, Math.ceil(filteredLinks.length / itemsPerPage));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      displayLinks(getPageLinks(filteredLinks, currentPage));
       updatePagination(filteredLinks.length);
     }
 
+    function switchCategory(category) {
+      currentCategory = category;
+      currentPage = 1;
+      document.getElementById('tabWebMyWidgets').classList.toggle('active', category === 'WebMyWidgets');
+      document.getElementById('tabTech').classList.toggle('active', category === '常用技術');
+      renderCurrentPage();
+    }
+
+    function searchLinks() {
+      currentPage = 1;
+      renderCurrentPage();
+    }
+
     function updatePagination(filteredLinksCount) {
-      const totalPages = Math.ceil(filteredLinksCount / itemsPerPage);
+      const totalPages = Math.max(1, Math.ceil(filteredLinksCount / itemsPerPage));
       document.getElementById('prevBtn').disabled = currentPage === 1;
       document.getElementById('nextBtn').disabled = currentPage >= totalPages;
     }
 
     function changePage(direction) {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const filteredLinks = allLinks.filter(link =>
-        link.text.toLowerCase().includes(searchQuery)
-      );
-
-      const totalPages = Math.ceil(filteredLinks.length / itemsPerPage);
+      const filteredLinks = getFilteredLinks();
+      const totalPages = Math.max(1, Math.ceil(filteredLinks.length / itemsPerPage));
       currentPage += direction;
       if (currentPage < 1) currentPage = 1;
       if (currentPage > totalPages) currentPage = totalPages;
 
-      const pageLinks = filteredLinks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-      displayLinks(pageLinks);
-      updatePagination(filteredLinks.length);
+      renderCurrentPage();
     }
 
     window.onload = function () {
-      displayLinks(getPageLinks(currentPage));
-      updatePagination(allLinks.length);
+      renderCurrentPage();
     };
   </script>
 
