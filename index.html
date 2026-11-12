@@ -123,7 +123,7 @@
                 category.items.forEach(item => {
                     const listItem = document.createElement('li');
                     listItem.className = 'menu-item';
-                    listItem.textContent = item.title;
+                    listItem.file = item.title;
                     
                     // 綁定點擊事件：渲染文章內容
                     listItem.addEventListener('click', () => {
