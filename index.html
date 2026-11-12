@@ -85,97 +85,92 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 
     <script>
-        // 1. 定義雙層分類資料與對應的 Markdown 內容
-        // 實務上，你可以將 content 改為檔案路徑，透過 fetch('xxx.md') 動態讀取
-        const articleData = [
-			{
-				mainCategory: "前端基礎",
-				items: [
-					{
-						title: "HTML 語意化標籤",
-						file: "aa.md" // 改為檔案路徑
-					},
-					{
-						title: "CSS Flexbox 佈局",
-						file: "./articles/css-flexbox.md" // 改為檔案路徑
-					}
-				]
-			}
-		];
+    // 1. 定義雙層分類資料與對應的 Markdown 內容
+const articleData = [
+    {
+        mainCategory: "前端基礎",
+        items: [
+            {
+                title: "HTML 語意化標籤",
+                file: "aa.md"
+            },
+            {
+                title: "CSS Flexbox 佈局",
+                file: "./articles/css-flexbox.md"
+            }
+        ]
+    }
+];
 
-        const sidebar = document.getElementById('sidebar');
-        const articleContent = document.getElementById('article-content');
-        let activeMenuItem = null; // 紀錄目前被選取的選單項目
+const sidebar = document.getElementById('sidebar');
+const articleContent = document.getElementById('article-content');
+let activeMenuItem = null;
 
-        // 2. 動態生成雙層選單
-        function renderMenu() {
-            articleData.forEach(category => {
-                // 建立主分類標題
-                const categoryTitle = document.createElement('div');
-                categoryTitle.className = 'menu-category';
-                categoryTitle.textContent = category.mainCategory;
-                sidebar.appendChild(categoryTitle);
+// 2. 動態生成雙層選單
+function renderMenu() {
+    articleData.forEach(category => {
+        const categoryTitle = document.createElement('div');
+        categoryTitle.className = 'menu-category';
+        categoryTitle.textContent = category.mainCategory;
+        sidebar.appendChild(categoryTitle);
 
-                // 建立次項目列表
-                const list = document.createElement('ul');
-                list.className = 'menu-list';
-                
-                category.items.forEach(item => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'menu-item';
-                    listItem.file = item.title;
-                    
-                    // 綁定點擊事件：渲染文章內容
-                    listItem.addEventListener('click', () => {
-                        renderArticle(item.file, listItem);
-                    });
-                    
-                    list.appendChild(listItem);
-                });
-                
-                sidebar.appendChild(list);
+        const list = document.createElement('ul');
+        list.className = 'menu-list';
+        
+        category.items.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.className = 'menu-item';
+            // 【修正】將文字正確顯示在選單上
+            listItem.textContent = item.title;
+            
+            // 綁定點擊事件：渲染文章內容
+            listItem.addEventListener('click', () => {
+                renderArticle(item.file, listItem);
             });
+            
+            list.appendChild(listItem);
+        });
+        
+        sidebar.appendChild(list);
+    });
+}
+
+// 3. 渲染 Markdown 內容至右側區塊
+async function renderArticle(filePath, clickedElement) {
+    if (!filePath) {
+        articleContent.innerHTML = '<div class="placeholder" style="color: red;">❌ 錯誤：找不到檔案路徑。</div>';
+        return;
+    }
+
+    if (activeMenuItem) activeMenuItem.classList.remove('active');
+    clickedElement.classList.add('active');
+    activeMenuItem = clickedElement;
+
+    articleContent.innerHTML = '<div class="placeholder">⏳ 文章載入中...</div>';
+
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`HTTP 錯誤狀態碼: ${response.status}`);
+        
+        const markdownText = await response.text();
+
+        if (!markdownText) {
+            throw new Error("檔案內容為空");
         }
 
-        // 3. 渲染 Markdown 內容至右側區塊
-		async function renderArticle(filePath, clickedElement) {
-		    // 【防呆 1】檢查有沒有傳入路徑
-		    if (!filePath) {
-		        articleContent.innerHTML = '<div class="placeholder" style="color: red;">❌ 錯誤：找不到檔案路徑，請檢查 articleData 是否有設定 file 屬性。</div>';
-		        console.error("renderArticle 收到 undefined 的 filePath");
-		        return;
-		    }
-		
-		    if (activeMenuItem) activeMenuItem.classList.remove('active');
-		    clickedElement.classList.add('active');
-		    activeMenuItem = clickedElement;
-		
-		    articleContent.innerHTML = '<div class="placeholder">⏳ 文章載入中...</div>';
-		
-		    try {
-		        const response = await fetch(filePath);
-		        if (!response.ok) throw new Error(`HTTP 錯誤狀態碼: ${response.status}`);
-		        
-		        const markdownText = await response.text();
-		
-		        // 【防呆 2】確保轉出來的文字不是空的或 null
-		        if (!markdownText) {
-		            throw new Error("檔案內容為空");
-		        }
-		
-		        // 這裡確保傳給 marked.parse 的一定是字串
-		        articleContent.innerHTML = marked.parse(markdownText);
-		        Prism.highlightAll();
-		        document.querySelector('.main-content').scrollTop = 0;
-		
-		    } catch (error) {
-		        articleContent.innerHTML = `<div class="placeholder" style="color: red;">❌ 讀取失敗：<br>${error.message}</div>`;
-		        console.error("載入文章時發生錯誤:", error);
-		    }
-		}
+        // 【修正】確保傳給 marked.parse 的絕對是字串型別
+        articleContent.innerHTML = marked.parse(markdownText || '');
+        Prism.highlightAll();
+        document.querySelector('.main-content').scrollTop = 0;
 
-        // 啟動應用：初始化選單
-        renderMenu();
+    } catch (error) {
+        articleContent.innerHTML = `<div class="placeholder" style="color: red;">❌ 讀取失敗：<br>${error.message}</div>`;
+        console.error("載入文章時發生錯誤:", error);
+    }
+}
+
+// 啟動應用：初始化選單
+renderMenu();
     </script>
 </body>
 </html>
