@@ -1,270 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WebMyWidgets</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技術文件庫</title>
+    <!-- Prism.js 程式碼高亮主題 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary-color: #007acc;
+            --bg-color: #f9f9f9;
+            --border-color: #e1e4e8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; height: 100vh; color: #333; }
+        
+        /* 左側導覽列 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .menu-category {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 1.1em;
+        }
+        .menu-list { list-style: none; padding-left: 10px; }
+        .menu-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            cursor: pointer;
+            border-radius: 6px;
+            color: #444;
+            transition: background 0.2s, color 0.2s;
+        }
+        .menu-item:hover { background-color: #eaeaea; }
+        .menu-item.active {
+            background-color: #e6f7ff;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-left: 3px solid var(--primary-color);
+        }
 
-  <!-- Bootstrap Icons CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
-
-    header {
-      text-align: center;
-      padding: 20px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 2rem;
-      border-radius: 8px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .search-container {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .search-container input {
-      padding: 10px;
-      width: 300px;
-      font-size: 1rem;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      margin-right: 10px;
-    }
-
-    .search-container button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .search-container button:hover {
-      background-color: #45a049;
-    }
-
-    .category-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .category-tabs button {
-      padding: 10px 18px;
-      font-size: 1rem;
-      border: 1px solid #4CAF50;
-      background-color: #fff;
-      color: #4CAF50;
-      border-radius: 999px;
-      cursor: pointer;
-    }
-
-    .category-tabs button.active {
-      background-color: #4CAF50;
-      color: #fff;
-    }
-
-    .link-list {
-      display: flex;
-      flex-direction: column;
-      margin-top: 20px;
-    }
-
-    .link-item {
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin: 10px;
-      text-align: left;
-      border-radius: 8px;
-      transition: transform 0.3s;
-      display: flex;
-      align-items: center;
-    }
-
-    .link-item:hover {
-      transform: scale(1.03);
-    }
-
-    .link-item a {
-      text-decoration: none;
-      color: #333;
-      font-size: 1.2rem;
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .link-icon {
-      font-size: 1.4rem;
-      color: #4CAF50;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .pagination button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      cursor: pointer;
-      margin: 0 5px;
-    }
-
-    .pagination button:hover {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: #888;
-    }
-  </style>
+        /* 右側文章區 */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #fff;
+        }
+        .article-container { max-width: 800px; margin: 0 auto; line-height: 1.7; }
+        .article-container h1, .article-container h2, .article-container h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 24px;
+            margin-bottom: 16px;
+        }
+        .article-container pre { border-radius: 8px; padding: 16px; overflow-x: auto; }
+        .article-container code { background: #f6f8fa; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        .article-container pre code { background: transparent; padding: 0; }
+        .placeholder { color: #888; text-align: center; margin-top: 20vh; font-size: 1.2em; }
+    </style>
 </head>
 <body>
 
-  <header>
-    WebMyWidgets - 工具大集合
-  </header>
+    <!-- 左側分類選單 -->
+    <aside class="sidebar" id="sidebar"></aside>
 
-  <div class="container">
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="搜尋連結..." />
-      <button onclick="searchLinks()">搜尋</button>
-    </div>
+    <!-- 右側文章內容 -->
+    <main class="main-content">
+        <div class="article-container" id="article-content">
+            <div class="placeholder">👈 請從左側選單選擇一篇文章</div>
+        </div>
+    </main>
 
-    <div class="category-tabs">
-      <button id="tabWebMyWidgets" class="active" onclick="switchCategory('WebMyWidgets')">WebMyWidgets</button>
-      <button id="tabTech" onclick="switchCategory('常用技術')">常用技術</button>
-    </div>
+    <!-- 引入解析 Markdown 與程式碼高亮的套件 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 
-    <div id="linkList" class="link-list">
-      <!-- 動態生成連結 -->
-    </div>
+    <script>
+        // 1. 定義雙層分類資料與對應的 Markdown 內容
+        // 實務上，你可以將 content 改為檔案路徑，透過 fetch('xxx.md') 動態讀取
+        const articleData = [
+			{
+				mainCategory: "前端基礎",
+				items: [
+					{
+						title: "HTML 語意化標籤",
+						file: "./aamd" // 改為檔案路徑
+					},
+					{
+						title: "CSS Flexbox 佈局",
+						file: "./articles/css-flexbox.md" // 改為檔案路徑
+					}
+				]
+			}
+		];
 
-    <div class="pagination">
-      <button id="prevBtn" onclick="changePage(-1)">上一頁</button>
-      <button id="nextBtn" onclick="changePage(1)">下一頁</button>
-    </div>
-  </div>
+        const sidebar = document.getElementById('sidebar');
+        const articleContent = document.getElementById('article-content');
+        let activeMenuItem = null; // 紀錄目前被選取的選單項目
 
-  <footer>
-    &copy; 2025 WebMyWidgets. All rights reserved.
-  </footer>
+        // 2. 動態生成雙層選單
+        function renderMenu() {
+            articleData.forEach(category => {
+                // 建立主分類標題
+                const categoryTitle = document.createElement('div');
+                categoryTitle.className = 'menu-category';
+                categoryTitle.textContent = category.mainCategory;
+                sidebar.appendChild(categoryTitle);
 
-  <script>
-    const allLinks = [
-      { text: "抽籤小程式", url: "抽籤.html", icon: "bi-dice-5", category: "WebMyWidgets" },
-      { text: "計數器", url: "計數器.html", icon: "bi-journal-code", category: "WebMyWidgets" },
-      { text: "錄音(測試中)", url: "錄音.html", icon: "bi-journal-code", category: "WebMyWidgets" },
-      { text: "動詞三態測驗", url: "TestVerbs.html", icon: "bi-chat-dots", category: "WebMyWidgets" },
-      { text: "Cron 產生器", url: "CronExpression.html", icon: "bi-clock", category: "WebMyWidgets" },
-      { text: "Json檢視器", url: "JsonViewer.html", icon: "bi-code-slash", category: "WebMyWidgets" },
-      { text: "簡單todo管理", url: "/todolist/trello_style_task_board.html", icon: "bi-bug", category: "WebMyWidgets" },
-      { text: "自然發音", url: "Phonics.html", icon: "bi-bar-chart", category: "WebMyWidgets" },
-      { text: "計算機", url: "Calculator/index.html", icon: "bi-book", category: "WebMyWidgets" },
-      { text: "線上編輯器", url: "https://example.com/online-editor", icon: "bi-pencil-square", category: "常用技術" }
-    ];
+                // 建立次項目列表
+                const list = document.createElement('ul');
+                list.className = 'menu-list';
+                
+                category.items.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'menu-item';
+                    listItem.textContent = item.title;
+                    
+                    // 綁定點擊事件：渲染文章內容
+                    listItem.addEventListener('click', () => {
+                        renderArticle(item.content, listItem);
+                    });
+                    
+                    list.appendChild(listItem);
+                });
+                
+                sidebar.appendChild(list);
+            });
+        }
 
-    const itemsPerPage = 10;
-    let currentPage = 1;
-    let currentCategory = "WebMyWidgets";
+        // 3. 渲染 Markdown 內容至右側區塊
+        function renderArticle(markdownText, clickedElement) {
+            // 更新選單的 Active 狀態 (高亮目前選取的項目)
+            if (activeMenuItem) {
+                activeMenuItem.classList.remove('active');
+            }
+            clickedElement.classList.add('active');
+            activeMenuItem = clickedElement;
 
-    function displayLinks(links) {
-      const linkListDiv = document.getElementById('linkList');
-      linkListDiv.innerHTML = '';
+            // 將 Markdown 轉為 HTML 並放入右側容器
+            articleContent.innerHTML = marked.parse(markdownText);
+            
+            // 呼叫 Prism.js 重新掃描並加上程式碼顏色
+            Prism.highlightAll();
+            
+            // 將右側卷軸滾動回頂部
+            document.querySelector('.main-content').scrollTop = 0;
+        }
 
-      links.forEach(link => {
-        const linkDiv = document.createElement('div');
-        linkDiv.className = 'link-item';
-        linkDiv.innerHTML = `
-          <i class="link-icon bi ${link.icon}"></i>
-          <a href="${link.url}" target="_blank">${link.text}</a>
-        `;
-        linkListDiv.appendChild(linkDiv);
-      });
-    }
-
-    function getPageLinks(links, page) {
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      return links.slice(startIndex, endIndex);
-    }
-
-    function getFilteredLinks() {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      return allLinks.filter(link =>
-        link.category === currentCategory &&
-        link.text.toLowerCase().includes(searchQuery)
-      );
-    }
-
-    function renderCurrentPage() {
-      const filteredLinks = getFilteredLinks();
-      const totalPages = Math.max(1, Math.ceil(filteredLinks.length / itemsPerPage));
-      if (currentPage > totalPages) currentPage = totalPages;
-
-      displayLinks(getPageLinks(filteredLinks, currentPage));
-      updatePagination(filteredLinks.length);
-    }
-
-    function switchCategory(category) {
-      currentCategory = category;
-      currentPage = 1;
-      document.getElementById('tabWebMyWidgets').classList.toggle('active', category === 'WebMyWidgets');
-      document.getElementById('tabTech').classList.toggle('active', category === '常用技術');
-      renderCurrentPage();
-    }
-
-    function searchLinks() {
-      currentPage = 1;
-      renderCurrentPage();
-    }
-
-    function updatePagination(filteredLinksCount) {
-      const totalPages = Math.max(1, Math.ceil(filteredLinksCount / itemsPerPage));
-      document.getElementById('prevBtn').disabled = currentPage === 1;
-      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-    }
-
-    function changePage(direction) {
-      const filteredLinks = getFilteredLinks();
-      const totalPages = Math.max(1, Math.ceil(filteredLinks.length / itemsPerPage));
-      currentPage += direction;
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPages) currentPage = totalPages;
-
-      renderCurrentPage();
-    }
-
-    window.onload = function () {
-      renderCurrentPage();
-    };
-  </script>
-
+        // 啟動應用：初始化選單
+        renderMenu();
+    </script>
 </body>
 </html>
